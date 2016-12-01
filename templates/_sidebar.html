@@ -1,0 +1,40 @@
+<!-- Sidebar -->
+<div id="sidebar-wrapper">
+    <ul class="sidebar-nav">
+        <li class="sidebar-brand">
+            <a href="/">FindFolks</a>
+        </li>
+        <li>
+            <a href="/">Home</a>
+        </li>
+        {% if not message %}
+            <li>
+                <a href="/login">Login</a>
+            </li>
+            <li>
+                <a href="/register">Register</a>
+            </li>
+        {% endif %}
+        {% if message %}
+            <li>
+                <a href="/logout">Logout</a>
+            </li>
+            <li>
+                <a href="/remove_account">Remove Account</a>
+            </li>
+            <li>
+                <a href="/tweets">View Your Tweets</a>
+            </li>
+            <li>
+                <a href="/find_people">Follow Users</a>
+            </li>
+            <li>
+                <a href="/unfollow">Unfollow Users</a>
+            </li>
+            <li>
+                <a href="/view_followed">View Followed</a>
+            </li>
+        {% endif %}
+    </ul>
+</div>
+<!-- /#sidebar-wrapper -->

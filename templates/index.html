@@ -2,32 +2,40 @@
 <html>
 
 <head>
-
+    <link href="static/css/bootstrap.min.css" rel="stylesheet">
+    <link href="static/css/simple-sidebar.css" rel="stylesheet">
 </head>
 
 <body>
-{% if not message %}
-	<a href="/login">Login</a>
-	<a href="/register">Register</a>
-{% endif %}
+<div id="wrapper">
 
-{% if message %}
-	<a href="/logout">Logout</a>
-	<a href="/remove_account">Remove Account</a>
-	<p class="message">You are logged in {{message}}. You have {{num}} follower(s)</p> </br>
-	<a href="/tweets">View your tweets</a> </br>
-	<a href="/find_people">Find people to follow</a> </br>
-	<a href="/unfollow">Unfollow someone</a> </br>
-	<a href="/view_followed">View people you have followed</a> </br>
-	</br>
+    {% include '_sidebar.html' %}
 
-        <h4>15 most recent tweets from you and your followers </h4> </br>
+    <!-- Make sure to keep all page content within the #page-content-wrapper div. -->
+    <!-- Page Content -->
+    <div id="page-content-wrapper">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-12">
+                    <h1>Welcome to FindFolks!</h1>
+                    <p>FindFolks Description</p> </br>
+                    {% if message %}
+                        <h4>15 most recent tweets from you and your followers </h4> </br>
+                        {% for line in tweets %}
+                            <p>{{ line }}</p>
+                            <hr>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /#page-content-wrapper -->
 
-	{% for line in tweets %}
-	        <p>{{line}}</p>
-	        <hr>
-	{% endfor %}
-	{% endif %}
+</div>
+
+<script src="static/js/jquery.js"></script>
+<script src="static/js/bootstrap.min.js"></script>
 </body>
 
 </html>
