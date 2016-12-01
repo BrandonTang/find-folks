@@ -2,12 +2,12 @@
 <div id="sidebar-wrapper">
     <ul class="sidebar-nav">
         <li class="sidebar-brand">
-            <a href="/">FindFolks</a>
+            <a>FindFolks</a>
         </li>
-        <li>
-            <a href="/">Home</a>
-        </li>
-        {% if not message %}
+        {% if not logged_in %}
+            <li>
+                <a href="/">Home</a>
+            </li>
             <li>
                 <a href="/login">Login</a>
             </li>
@@ -15,7 +15,10 @@
                 <a href="/register">Register</a>
             </li>
         {% endif %}
-        {% if message %}
+        {% if logged_in %}
+            <li>
+                <a href="/home">Home</a>
+            </li>
             <li>
                 <a href="/logout">Logout</a>
             </li>
@@ -23,7 +26,7 @@
                 <a href="/remove_account">Remove Account</a>
             </li>
             <li>
-                <a href="/tweets">View Your Tweets</a>
+                <a href="/tweets">View Tweets</a>
             </li>
             <li>
                 <a href="/find_people">Follow Users</a>

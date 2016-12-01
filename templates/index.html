@@ -19,7 +19,7 @@
                 <div class="col-lg-12">
                     <h1>Welcome to FindFolks!</h1>
                     <p>FindFolks Description</p> </br>
-                    {% if message %}
+                    {% if logged_in %}
                         <h4>15 most recent tweets from you and your followers </h4> </br>
                         {% for line in tweets %}
                             <p>{{ line }}</p>
