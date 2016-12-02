@@ -11,7 +11,7 @@ conn = pymysql.connect(unix_socket='/Applications/MAMP/tmp/mysql/mysql.sock',
 					   host='localhost',
                        user='root',
                        password='root',
-                       db='meetup3',
+                       db='findFolks',
                        charset='utf8mb4',
                        cursorclass=pymysql.cursors.DictCursor)
 
@@ -41,11 +41,11 @@ def loginAuth():
 	#grabs information from the forms
 	username = request.form['username']
 	password = request.form['password']
-	md5password = hashlib.md5(password).hexdigest()
+	md5password = hashlib.md5(password.encode('utf-8')).hexdigest()
 	#cursor used to send queries
 	cursor = conn.cursor()
 	#executes query
-	query = 'SELECT * FROM user WHERE username = %s and password = %s'
+	query = 'SELECT * FROM member WHERE username = %s and password = %s'
 	cursor.execute(query, (username, md5password))
 	#stores the results in a variable
 	data = cursor.fetchone()
@@ -69,12 +69,16 @@ def registerAuth():
 	#grabs information from the forms
 	username = request.form['username']
 	password = request.form['password']
-	md5password = hashlib.md5(password).hexdigest()
+	md5password = hashlib.md5(password.encode('utf-8')).hexdigest()
+	first_name = request.form['first_name']
+	last_name = request.form['last_name']
+	email = request.form['email']
+	zip_code = request.form['zip_code']
 	#cursor used to send queries
 	cursor = conn.cursor()
 	#executes query
-	query = 'SELECT * FROM user WHERE username = %s'
-	cursor.execute(query, username)
+	query = 'SELECT * FROM member WHERE username = %s AND firstname = %s AND lastname = %s AND email = %s'
+	cursor.execute(query, (username, first_name, last_name, email))
 	#stores the results in a variable
 	data = cursor.fetchone()
 	#use fetchall() if you are expecting more than 1 data row
@@ -84,8 +88,8 @@ def registerAuth():
 		error = "This user already exists."
 		return render_template('register.html', error=error)
 	else:
-		ins = 'INSERT INTO user VALUES(%s, %s)'
-		cursor.execute(ins, (username, md5password))
+		ins = 'INSERT INTO member VALUES (%s, %s, %s, %s, %s, %s)'
+		cursor.execute(ins, (username, md5password, first_name, last_name, email, zip_code))
 		conn.commit()
 		cursor.close()
 		return render_template('index.html')
@@ -96,7 +100,7 @@ def home():
 	username = session['username']
 	logged_in = session['logged_in']
 	cursor = conn.cursor()
-	query = 'SELECT ts, blog_post FROM blog WHERE username = %s ORDER BY ts DESC'
+	query = 'SELECT category, keyword FROM interested_in WHERE username = %s'
 	cursor.execute(query, username)
 	data = cursor.fetchall()
 	cursor.close()
@@ -109,14 +113,14 @@ def tweets():
 	if session.get('logged_in') is True:
 		logged_in = True
 	cursor = conn.cursor()
-	query = 'SELECT username FROM user'
+	query = 'SELECT username FROM member'
 	cursor.execute(query)
 	all_users = cursor.fetchall()
 	cursor.close()
 	if request.method == 'POST':
 		select_user = request.form.getlist('select_user')[0]
 		cursor = conn.cursor()
-		query = 'SELECT ts, blog_post FROM blog WHERE username = %s ORDER BY ts DESC'
+		query = 'SELECT category, keyword FROM interested_in WHERE username = %s'
 		cursor.execute(query, select_user)
 		user_tweets = cursor.fetchall()
 		cursor.close()
@@ -127,10 +131,22 @@ def tweets():
 @app.route('/post', methods=['GET', 'POST'])
 def post():
 	username = session['username']
+	title = request.form['title']
+	description = request.form['description']
 	cursor = conn.cursor()
-	blog = request.form['blog']
-	query = 'INSERT INTO blog (blog_post, username) VALUES(%s, %s)'
-	cursor.execute(query, (blog, username))
+	query1 = 'INSERT INTO an_event (title, description) VALUES (%s, %s)'
+	cursor.execute(query1, (title, description))
+	conn.commit()
+	cursor.close()
+	cursor = conn.cursor()
+	query2 = 'SELECT event_id FROM an_event WHERE title = %s AND description = %s'
+	cursor.execute(query2, (title, description))
+	event_id = cursor.fetchone()
+	query3 = 'SELECT group_id FROM a_group WHERE creator = %s'
+	cursor.execute(query3, username)
+	group_id = cursor.fetchone()
+	query4 = 'INSERT INTO organize (event_id, group_id) VALUES (%s, %s)'
+	cursor.execute(query4, (event_id, group_id))
 	conn.commit()
 	cursor.close()
 	return redirect(url_for('home'))
