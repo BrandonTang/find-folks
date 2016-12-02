@@ -106,6 +106,9 @@ def logout():
 
 @app.route('/home')
 def home():
+	"""
+	Return the homepage that shows upcoming events for current day and next three days.
+	"""
 	username = session['username']
 	logged_in = session['logged_in']
 	cursor = conn.cursor()
@@ -116,29 +119,22 @@ def home():
 	return render_template('home.html', username=username, posts=data, logged_in=logged_in)
 
 
-@app.route('/tweets', methods=['GET', 'POST'])
-def tweets():
+@app.route('/create_events')
+def create_events():
+	"""
+	Return the create_event page that calls the submit_event function on submit.
+	"""
 	logged_in = False
 	if session.get('logged_in') is True:
 		logged_in = True
-	cursor = conn.cursor()
-	query = 'SELECT username FROM member'
-	cursor.execute(query)
-	all_users = cursor.fetchall()
-	cursor.close()
-	if request.method == 'POST':
-		select_user = request.form.getlist('select_user')[0]
-		cursor = conn.cursor()
-		query = 'SELECT category, keyword FROM interested_in WHERE username = %s'
-		cursor.execute(query, select_user)
-		user_tweets = cursor.fetchall()
-		cursor.close()
-		return render_template('tweets.html', posts=user_tweets, all_users=all_users, logged_in=logged_in)
-	return render_template('tweets.html', all_users = all_users, logged_in=logged_in)
+	return render_template('create_events.html', logged_in=logged_in)
 
-		
-@app.route('/post', methods=['GET', 'POST'])
-def post():
+
+@app.route('/submit_event', methods=['GET', 'POST'])
+def submit_event():
+	"""
+	Creates event in the database and redirects to create_event page.
+	"""
 	username = session['username']
 	title = request.form['title']
 	description = request.form['description']
@@ -158,7 +154,53 @@ def post():
 	cursor.execute(query4, (event_id, group_id))
 	conn.commit()
 	cursor.close()
-	return redirect(url_for('home'))
+	return redirect(url_for('create_events'))
+
+
+@app.route('/browse_events', methods=['GET', 'POST'])
+def browse_events():
+	"""
+	Return the browse_events page that allows user to view and sign up for events under their interests.
+	"""
+	logged_in = False
+	if session.get('logged_in') is True:
+		logged_in = True
+	cursor = conn.cursor()
+	query = 'SELECT username FROM member'
+	cursor.execute(query)
+	all_users = cursor.fetchall()
+	cursor.close()
+	if request.method == 'POST':
+		select_user = request.form.getlist('select_user')[0]
+		cursor = conn.cursor()
+		query = 'SELECT category, keyword FROM interested_in WHERE username = %s'
+		cursor.execute(query, select_user)
+		user_tweets = cursor.fetchall()
+		cursor.close()
+		return render_template('browse_events.html', events=user_tweets, all_users=all_users, logged_in=logged_in)
+	return render_template('browse_events.html', all_users = all_users, logged_in=logged_in)
+
+
+@app.route('/rate_events')
+def rate_events():
+	"""
+	Return the rate_events page that allows users to rate past events they have participated in.
+	"""
+	logged_in = False
+	if session.get('logged_in') is True:
+		logged_in = True
+	return render_template('rate_events.html', logged_in=logged_in)
+
+
+@app.route('/friends_events')
+def friends_events():
+	"""
+	Return the friends_events page that allows users to view events their friends signed up for.
+	"""
+	logged_in = False
+	if session.get('logged_in') is True:
+		logged_in = True
+	return render_template('friends_events.html', logged_in=logged_in)
 
 
 if __name__ == "__main__":

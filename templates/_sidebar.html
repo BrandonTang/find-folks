@@ -19,23 +19,22 @@
             <li>
                 <a href="/home">Home</a>
             </li>
+            {% if create_event %}
+                <li>
+                    <a href="/create_event">Create Events</a>
+                </li>
+            {% endif %}
+            <li>
+                <a href="/browse_events">Browse Events</a>
+            </li>
+            <li>
+                <a href="/rate_events">Rate Events</a>
+            </li>
+            <li>
+                <a href="/friends_events">View Friends Events</a>
+            </li>
             <li>
                 <a href="/logout">Logout</a>
-            </li>
-            <li>
-                <a href="/remove_account">Remove Account</a>
-            </li>
-            <li>
-                <a href="/tweets">View Tweets</a>
-            </li>
-            <li>
-                <a href="/find_people">Follow Users</a>
-            </li>
-            <li>
-                <a href="/unfollow">Unfollow Users</a>
-            </li>
-            <li>
-                <a href="/view_followed">View Followed</a>
             </li>
         {% endif %}
     </ul>

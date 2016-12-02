@@ -20,13 +20,6 @@
                     {% include '_flash.html' %}
                     <h1>Welcome to FindFolks!</h1>
                     <p>FindFolks Description</p> </br>
-                    {% if logged_in %}
-                        <h4>15 most recent tweets from you and your followers </h4> </br>
-                        {% for line in tweets %}
-                            <p>{{ line }}</p>
-                            <hr>
-                        {% endfor %}
-                    {% endif %}
                 </div>
             </div>
         </div>
