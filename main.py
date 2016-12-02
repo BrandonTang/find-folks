@@ -1,10 +1,10 @@
-#Import Flask Library
-from flask import Flask, render_template, request, session, url_for, redirect
+from flask import Flask, render_template, request, session, url_for, redirect, flash
 import hashlib
 import pymysql.cursors
 
-#Initialize the app from Flask
+# Initialize the app from Flask
 app = Flask(__name__)
+app.secret_key = 'secret_key'
 
 # Configure MySQL
 conn = pymysql.connect(unix_socket='/Applications/MAMP/tmp/mysql/mysql.sock',
@@ -15,58 +15,61 @@ conn = pymysql.connect(unix_socket='/Applications/MAMP/tmp/mysql/mysql.sock',
                        charset='utf8mb4',
                        cursorclass=pymysql.cursors.DictCursor)
 
-#Define a route to hello function
+
 @app.route('/')
-def hello():
+def index():
+	"""
+	Return the home page for users not logged in.
+	"""
 	if session.get('logged_in') is True:
 		return redirect(url_for('home'))
 	return render_template('index.html')
 
 
-#Define route for login
 @app.route('/login')
 def login():
+	"""
+	Return the login page that calls login_auth on submit.
+	"""
 	return render_template('login.html')
 
 
-#Define route for register
-@app.route('/register')
-def register():
-	return render_template('register.html')
-
-
-#Authenticates the login
-@app.route('/loginAuth', methods=['GET', 'POST'])
-def loginAuth():
-	#grabs information from the forms
+@app.route('/login_auth', methods=['GET', 'POST'])
+def login_auth():
+	"""
+	Authenticates user credentials, creates session for user if valid, else redirects to login with flash message.
+	"""
 	username = request.form['username']
 	password = request.form['password']
 	md5password = hashlib.md5(password.encode('utf-8')).hexdigest()
-	#cursor used to send queries
 	cursor = conn.cursor()
-	#executes query
 	query = 'SELECT * FROM member WHERE username = %s and password = %s'
 	cursor.execute(query, (username, md5password))
-	#stores the results in a variable
-	data = cursor.fetchone()
-	#use fetchall() if you are expecting more than 1 data row
+	user = cursor.fetchone()
 	cursor.close()
-	if data:
-		#creates a session for the the user
-		#session is a built in
+	if user:
 		session['username'] = username
 		session['logged_in'] = True
+		flash('User successfully logged in!', category='success')
 		return redirect(url_for('home'))
 	else:
-		#returns an error message to the html page
-		error = 'Invalid login or username'
-		return render_template('login.html', error=error)
+		flash('Invalid login or username or password.', category='error')
+		return redirect(url_for('login'))
 
 
-#Authenticates the register
-@app.route('/registerAuth', methods=['GET', 'POST'])
-def registerAuth():
-	#grabs information from the forms
+@app.route('/register')
+def register():
+	"""
+	Return the register page that calls register_auth on submit.
+	"""
+	return render_template('register.html')
+
+
+@app.route('/register_auth', methods=['GET', 'POST'])
+def register_auth():
+	"""
+	Checks if user already exists, redirects to register page if true, else creates new user.
+	"""
 	username = request.form['username']
 	password = request.form['password']
 	md5password = hashlib.md5(password.encode('utf-8')).hexdigest()
@@ -74,25 +77,31 @@ def registerAuth():
 	last_name = request.form['last_name']
 	email = request.form['email']
 	zip_code = request.form['zip_code']
-	#cursor used to send queries
 	cursor = conn.cursor()
-	#executes query
-	query = 'SELECT * FROM member WHERE username = %s AND firstname = %s AND lastname = %s AND email = %s'
-	cursor.execute(query, (username, first_name, last_name, email))
-	#stores the results in a variable
-	data = cursor.fetchone()
-	#use fetchall() if you are expecting more than 1 data row
-	error = None
-	if data:
-		#If the previous query returns data, then user exists
-		error = "This user already exists."
-		return render_template('register.html', error=error)
+	query = 'SELECT * FROM member WHERE username = %s'
+	cursor.execute(query, username)
+	user = cursor.fetchone()
+	if user:
+		flash('User already exists.', category='error')
+		return redirect(url_for('register'))
 	else:
 		ins = 'INSERT INTO member VALUES (%s, %s, %s, %s, %s, %s)'
 		cursor.execute(ins, (username, md5password, first_name, last_name, email, zip_code))
 		conn.commit()
 		cursor.close()
-		return render_template('index.html')
+		flash('User successfully registered! You may login now.', category='success')
+		return redirect(url_for('login'))
+
+
+@app.route('/logout')
+def logout():
+	"""
+	Logs out the user and removes information from session, then redirects to index page.
+	"""
+	session.pop('username')
+	session.pop('logged_in')
+	flash('User successfully logged out.', category='success')
+	return redirect('/')
 
 
 @app.route('/home')
@@ -152,16 +161,5 @@ def post():
 	return redirect(url_for('home'))
 
 
-@app.route('/logout')
-def logout():
-	session.pop('username')
-	session.pop('logged_in')
-	return redirect('/')
-
-
-app.secret_key = 'some key that you will never guess'
-#Run the app on localhost port 5000
-#debug = True -> you don't have to restart flask
-#for changes to go through, TURN OFF FOR PRODUCTION
 if __name__ == "__main__":
 	app.run('127.0.0.1', 5000, debug = True)
