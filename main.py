@@ -119,7 +119,7 @@ def home():
 	return render_template('home.html', username=username, posts=data, logged_in=logged_in)
 
 
-@app.route('/create_events')
+@app.route('/create_events', methods=['GET', 'POST'])
 def create_events():
 	"""
 	Return the create_event page that calls the submit_event function on submit.
@@ -127,6 +127,20 @@ def create_events():
 	logged_in = False
 	if session.get('logged_in') is True:
 		logged_in = True
+	if request.method == "POST":
+		title = request.form.get('title')
+		description = request.form.get('description')
+		start_time = request.form.get('start_time')
+		end_time = request.form.get('end_time')
+		location_name = request.form.get('location_name')
+		zipcode = int(request.form.get('zipcode'))
+		cursor = conn.cursor()
+		query1 = 'INSERT INTO an_event (title, description, start_time, end_time, location_name, zipcode) VALUES (%s, %s, %s, %s, %s, %s)'
+		cursor.execute(query1, (title, description, start_time, end_time, location_name, zipcode))
+		conn.commit()
+		cursor.close()
+		flash('Event successfully created!', category='success')
+		return redirect(url_for('create_events'))
 	return render_template('create_events.html', logged_in=logged_in)
 
 
