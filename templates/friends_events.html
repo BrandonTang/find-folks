@@ -21,7 +21,7 @@
                     <h1>View your friends upcoming events!</h1>
                     <form name="input" method="POST">
                         <select name="select_user">
-                            <option value="">Select User</option>
+                            <option value="">Select Friend</option>
                             {% for user in all_users %}
                                 <option value="{{ user['username'] }}">{{ user['username'] }}</option>
                             {% endfor %}
@@ -39,11 +39,19 @@
                     <table>
                         <th>Title</th>
                         <th>Description</th>
+                        <th>Start Time</th>
+                        <th>End Time</th>
+                        <th>Location Name</th>
+                        <th>ZipCode</th>
 
                         {% for line in events %}
                             <tr>
                                 <td>{{ line.title }}</td>
                                 <td>{{ line.description }}</td>
+                                <td>{{ line.start_time }}</td>
+                                <td>{{ line.end_time }}</td>
+                                <td>{{ line.location_name }}</td>
+                                <td>{{ line.zipcode }}</td>
                             </tr>
                         {% endfor %}
                     </table>

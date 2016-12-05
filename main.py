@@ -139,36 +139,36 @@ def create_events():
 		cursor.execute(query1, (title, description, start_time, end_time, location_name, zipcode))
 		conn.commit()
 		cursor.close()
+		# cursor = conn.cursor()
+		# query2 = 'SELECT event_id FROM an_event WHERE title = %s AND description = %s'
+		# cursor.execute(query2, (title, description))
+		# event_id = cursor.fetchone()
+		# query3 = 'SELECT group_id FROM a_group WHERE creator = %s'
+		# cursor.execute(query3, username)
+		# group_id = cursor.fetchone()
+		# query4 = 'INSERT INTO organize (event_id, group_id) VALUES (%s, %s)'
+		# cursor.execute(query4, (event_id, group_id))
+		# conn.commit()
+		# cursor.close()
 		flash('Event successfully created!', category='success')
 		return redirect(url_for('create_events'))
 	return render_template('create_events.html', logged_in=logged_in)
 
 
-@app.route('/submit_event', methods=['GET', 'POST'])
-def submit_event():
+@app.route('/friends', methods=['GET', 'POST'])
+def friends():
 	"""
-	Creates event in the database and redirects to create_event page.
+	Return the friends page that lists all friends available and allows for adding and removing friends.
 	"""
-	username = session['username']
-	title = request.form['title']
-	description = request.form['description']
+	logged_in = False
+	if session.get('logged_in') is True:
+		logged_in = True
 	cursor = conn.cursor()
-	query1 = 'INSERT INTO an_event (title, description) VALUES (%s, %s)'
-	cursor.execute(query1, (title, description))
-	conn.commit()
+	query = 'SELECT * FROM member'
+	cursor.execute(query)
+	members = cursor.fetchall()
 	cursor.close()
-	cursor = conn.cursor()
-	query2 = 'SELECT event_id FROM an_event WHERE title = %s AND description = %s'
-	cursor.execute(query2, (title, description))
-	event_id = cursor.fetchone()
-	query3 = 'SELECT group_id FROM a_group WHERE creator = %s'
-	cursor.execute(query3, username)
-	group_id = cursor.fetchone()
-	query4 = 'INSERT INTO organize (event_id, group_id) VALUES (%s, %s)'
-	cursor.execute(query4, (event_id, group_id))
-	conn.commit()
-	cursor.close()
-	return redirect(url_for('create_events'))
+	return render_template('friends.html', members=members, logged_in=logged_in)
 
 
 @app.route('/browse_events', methods=['GET', 'POST'])
