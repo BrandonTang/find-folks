@@ -195,26 +195,70 @@ def browse_events():
 	return render_template('browse_events.html', all_users = all_users, logged_in=logged_in)
 
 
-@app.route('/rate_events')
+@app.route('/rate_events', methods=['GET', 'POST'])
 def rate_events():
 	"""
 	Return the rate_events page that allows users to rate past events they have participated in.
 	"""
+	events = []
 	logged_in = False
 	if session.get('logged_in') is True:
 		logged_in = True
-	return render_template('rate_events.html', logged_in=logged_in)
+	username = session.get('username')
+	cursor = conn.cursor()
+	query = 'SELECT event_id FROM sign_up WHERE username = %s'
+	cursor.execute(query, username)
+	event_ids = cursor.fetchall()
+	cursor.close()
+	for event_id in event_ids:
+		cursor = conn.cursor()
+		query = 'SELECT * FROM event WHERE eventid = %s'
+		cursor.execute(query, event_id)
+		event_info = cursor.fetchone()
+		cursor.close()
+		events.append(event_info)
+	if request.method == "POST":
+		event = request.form.getlist('select_event')[0] # Grab event id
+		rating = request.form.getlist('select_rating')[0]
+		cursor = conn.cursor()
+		query = 'UPDATE signup WITH rating'
+		cursor.execute(query, (username, event, rating))
+		conn.commit()
+		cursor.close()
+	return render_template('rate_events.html', events=events, logged_in=logged_in)
 
 
-@app.route('/friends_events')
+@app.route('/friends_events', methods=['GET', 'POST'])
 def friends_events():
 	"""
 	Return the friends_events page that allows users to view events their friends signed up for.
 	"""
+	events = []
 	logged_in = False
 	if session.get('logged_in') is True:
 		logged_in = True
-	return render_template('friends_events.html', logged_in=logged_in)
+	username = session.get('username')
+	cursor = conn.cursor()
+	query = 'SELECT * FROM friend WHERE friend_to = %s'
+	cursor.execute(query, username)
+	friends_list = cursor.fetchall()
+	cursor.close()
+	if request.method == "POST":
+		friend = request.form.getlist('select_friend')[0]
+		cursor = conn.cursor()
+		query = 'SELECT event_id FROM sign_up WHERE username = %s'
+		cursor.execute(query, friend)
+		event_ids = cursor.fetchall()
+		cursor.close()
+		for event_id in event_ids:
+			cursor = conn.cursor()
+			query = 'SELECT * FROM event WHERE event_id = %s'
+			cursor.execute(query, event_id)
+			event_info = cursor.fetchone()
+			events.append(event_info)
+			cursor.close()
+		return render_template('friends_events.html', events=events, friends=friends_list, logged_in=logged_in)
+	return render_template('friends_events.html', friends=friends_list, logged_in=logged_in)
 
 
 if __name__ == "__main__":
