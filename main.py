@@ -270,6 +270,24 @@ def create_events():
 	return render_template('create_events.html', groups=groups, logged_in=logged_in)
 
 
+@app.route('/groups', methods=['GET', 'POST'])
+def groups():
+	"""
+	Return the groups page that lists groups that a member has the ability to join.
+	"""
+	logged_in = False
+	if session.get('logged_in') is True:
+		logged_in = True
+	username = session.get('username')
+	cursor = conn.cursor()
+	query = '' # query that finds all groups with the same interest of the user
+	cursor.execute(query, username)
+	groups = cursor.fetchall()
+	conn.commit()
+	cursor.close()
+	return render_template('groups.html', groups=groups, logged_in=logged_in)
+
+
 @app.route('/friends', methods=['GET', 'POST'])
 def friends():
 	"""
