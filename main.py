@@ -6,14 +6,25 @@ import pymysql.cursors
 app = Flask(__name__)
 app.secret_key = 'secret_key'
 
+#conn = pymysql.connect(
+#					   host='localhost',
+#                       user='root',
+#                       password='',
+#                       db='meetup3',
+#                       charset='utf8mb4',
+#                       cursorclass=pymysql.cursors.dictcursor
+#                       )
+
 # Configure MySQL
-conn = pymysql.connect(unix_socket='/Applications/MAMP/tmp/mysql/mysql.sock',
-					   host='localhost',
-                       user='root',
-                       password='root',
-                       db='findFolks',
-                       charset='utf8mb4',
-                       cursorclass=pymysql.cursors.DictCursor)
+conn = pymysql.connect(
+                      unix_socket='/Applications/MAMP/tmp/mysql/mysql.sock',
+					    host='localhost',
+                      user='root',
+                      password='root',
+                      db='findFolks',
+                      charset='utf8mb4',
+                      cursorclass=pymysql.cursors.DictCursor
+                      )
 
 
 @app.route('/')
@@ -280,7 +291,8 @@ def groups():
 		logged_in = True
 	username = session.get('username')
 	cursor = conn.cursor()
-	query = '' # query that finds all groups with the same interest of the user
+    #query that finds all groups with the same interest of the user
+	query = 'SELECT group_name, description FROM a_group g JOIN about a ON g.group_id = a.group_id JOIN interested_in i ON a.category = i.category AND a.keyword = i.keywordJOIN member m ON i.username = m.username WHERE m = %u'
 	cursor.execute(query, username)
 	groups = cursor.fetchall()
 	conn.commit()

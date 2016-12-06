@@ -1,4 +1,19 @@
 <!DOCTYPE html>
+
+<script type="text/javascript">
+    function validatePassword() {
+        var p = document.forms["registration"]["password"].value;
+        var p2 = document.forms["registration"]["confirm password"].value;
+        if (p != p2) {
+            alert("Passwords do not match!");
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+</script>
+
 <html>
 
 <head>
@@ -19,9 +34,10 @@
                 <div class="col-lg-12">
                     {% include '_flash.html' %}
                     <h1>Register</h1>
-                    <form action="/register_auth" method="POST">
+                    <form name="registration" action="/register_auth" onsubmit="return validatePassword()" method="POST">
                         <input type="text" name="username" placeholder="Username" maxlength="20" required/> </br>
                         <input type="password" name="password" placeholder="Password" maxlength="32" required/> </br>
+                        <input type="password" name="confirm password" placeholder="Confirm Password" maxlength="32" required /> </br>
                         <input type="text" name="first_name" placeholder="First Name" maxlength="20" required/> </br>
                         <input type="text" name="last_name" placeholder="Last Name" maxlength="20" required/> </br>
                         <input type="text" name="email" placeholder="Email" maxlength="32" required/> </br>
