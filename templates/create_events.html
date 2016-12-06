@@ -26,7 +26,15 @@
                         End Time: <input type="date" name="end_time" required/> </br>
                         Location Name: <input type="text" name="location_name" maxlength="20" required/> </br>
                         ZipCode: <input type="text" name="zipcode" maxlength="5" required/> </br>
-                        <input type="submit" value="Post"/>
+                        Group:
+                        <select name="select_group">
+                            {% for group in groups %}
+                                <option value="{{ group }}">
+                                    {{ group }}
+                                </option>
+                            {% endfor %}
+                        </select> </br>
+                        <input type="submit" value="Create"/>
                     </form>
                 </div>
             </div>

@@ -119,12 +119,98 @@ def home():
 	return render_template('home.html', username=username, posts=data, logged_in=logged_in)
 
 
+@app.route('/add_interests', methods=['GET', 'POST'])
+def add_interests():
+	logged_in = False
+	if session.get('logged_in') is True:
+		logged_in = True
+	username = session.get('username')
+	if request.method == "POST":
+		category = request.form.get('category')
+		keyword = request.form.get('keyword')
+		cursor = conn.cursor()
+		query = 'SELECT category, keyword FROM interest WHERE category = %s AND keyword = %s'
+		cursor.execute(query, (category, keyword))
+		existing_interest = cursor.fetchall()
+		conn.commit()
+		cursor.close()
+		if len(existing_interest) == 0:
+			cursor = conn.cursor()
+			query = 'INSERT INTO interest (category, keyword) VALUES (%s, %s)'
+			cursor.execute(query, (category, keyword))
+			conn.commit()
+			cursor.close()
+			flash("Brand new interest added to FindFolks!")
+		cursor = conn.cursor()
+		query = 'SELECT username, category, keyword FROM interested_in WHERE username = %s AND category = %s AND keyword = %s'
+		cursor.execute(query, (username, category, keyword))
+		duplicate_interest = cursor.fetchall()
+		conn.commit()
+		cursor.close()
+		if len(duplicate_interest) == 0:
+			cursor = conn.cursor()
+			query = 'INSERT INTO interested_in (username, category, keyword) VALUES (%s, %s, %s)'
+			cursor.execute(query, (username, category, keyword))
+			conn.commit()
+			cursor.close()
+			flash("New interest for member has been added!")
+		return redirect(url_for('add_interests'))
+	return render_template('add_interests.html', logged_in=logged_in)
+
+
 @app.route('/create_groups', methods=['GET', 'POST'])
 def create_groups():
 	"""
 	Return the create_groups page that allows users to create groups.
 	"""
-
+	logged_in = False
+	if session.get('logged_in') is True:
+		logged_in = True
+	username = session.get('username')
+	cursor = conn.cursor()
+	query = 'SELECT * FROM interest'
+	cursor.execute(query)
+	interests = cursor.fetchall()
+	conn.commit()
+	cursor.close()
+	if request.method == "POST":
+		interest_categories = []
+		interest_keywords = []
+		group_name = request.form.get('group_name')
+		description = request.form.get('description')
+		interest_list = request.form.getlist('select_interests')
+		for each_interest in interest_list:
+			interest = each_interest.split(', ')
+			interest_categories.append(interest[0])
+			interest_keywords.append(interest[1])
+		cursor = conn.cursor()
+		query = 'INSERT INTO a_group (group_name, description, creator) VALUES (%s, %s, %s)'
+		cursor.execute(query, (group_name, description, username))
+		conn.commit()
+		cursor.close()
+		flash("Group has been created!")
+		cursor = conn.cursor()
+		query = 'SELECT group_id FROM a_group WHERE group_name = %s AND description = %s'
+		cursor.execute(query, (group_name, description))
+		group_id = cursor.fetchone()
+		created_group_id = group_id['group_id']
+		conn.commit()
+		cursor.close()
+		for category, keyword in zip(interest_categories, interest_keywords):
+			cursor = conn.cursor()
+			query = 'INSERT INTO about (category, keyword, group_id) VALUES (%s, %s, %s)'
+			cursor.execute(query, (category, keyword, created_group_id))
+			conn.commit()
+			cursor.close()
+		flash("Group interests have been added!")
+		cursor = conn.cursor()
+		query = 'INSERT INTO belongs_to (group_id, username, authorized) VALUES (%s, %s, 1)'
+		cursor.execute(query, (created_group_id, username))
+		conn.commit()
+		cursor.close()
+		flash("You have been added as an authorized user to the group!")
+		return redirect(url_for('create_groups'))
+	return render_template('create_groups.html', interests=interests, logged_in=logged_in)
 
 
 @app.route('/create_events', methods=['GET', 'POST'])
@@ -135,7 +221,24 @@ def create_events():
 	logged_in = False
 	if session.get('logged_in') is True:
 		logged_in = True
-	# username = session.get('username')
+	username = session.get('username')
+	cursor = conn.cursor()
+	query = 'SELECT group_id FROM belongs_to WHERE username = %s AND authorized = 1'
+	cursor.execute(query, username)
+	group_ids = cursor.fetchall()
+	conn.commit()
+	cursor.close()
+	groups = []
+	for each_group_id in group_ids:
+		group_id = each_group_id['group_id']
+		cursor = conn.cursor()
+		query = 'SELECT group_name FROM a_group WHERE group_id = %s'
+		cursor.execute(query, group_id)
+		group_name = cursor.fetchone()
+		each_group_name = group_name['group_name']
+		groups.append(each_group_name)
+		conn.commit()
+		cursor.close()
 	if request.method == "POST":
 		title = request.form.get('title')
 		description = request.form.get('description')
@@ -143,25 +246,28 @@ def create_events():
 		end_time = request.form.get('end_time')
 		location_name = request.form.get('location_name')
 		zipcode = int(request.form.get('zipcode'))
+		select_group = request.form.getlist('select_group')
 		cursor = conn.cursor()
 		query1 = 'INSERT INTO an_event (title, description, start_time, end_time, location_name, zipcode) VALUES (%s, %s, %s, %s, %s, %s)'
 		cursor.execute(query1, (title, description, start_time, end_time, location_name, zipcode))
 		conn.commit()
 		cursor.close()
-		# cursor = conn.cursor()
-		# query2 = 'SELECT event_id FROM an_event WHERE title = %s AND description = %s'
-		# cursor.execute(query2, (title, description))
-		# event_id = cursor.fetchone()
-		# query3 = 'SELECT group_id FROM a_group WHERE creator = %s'
-		# cursor.execute(query3, username)
-		# group_id = cursor.fetchone()
-		# query4 = 'INSERT INTO organize (event_id, group_id) VALUES (%s, %s)'
-		# cursor.execute(query4, (event_id, group_id))
-		# conn.commit()
-		# cursor.close()
+		cursor = conn.cursor()
+		query2 = 'SELECT event_id FROM an_event WHERE title = %s AND description = %s'
+		cursor.execute(query2, (title, description))
+		event_id = cursor.fetchone()
+		created_event_id = event_id['event_id']
+		query3 = 'SELECT group_id FROM a_group WHERE group_name = %s'
+		cursor.execute(query3, select_group)
+		group_id = cursor.fetchone()
+		selected_group_id = group_id['group_id']
+		query4 = 'INSERT INTO organize (event_id, group_id) VALUES (%s, %s)'
+		cursor.execute(query4, (created_event_id, selected_group_id))
+		conn.commit()
+		cursor.close()
 		flash('Event successfully created!', category='success')
 		return redirect(url_for('create_events'))
-	return render_template('create_events.html', logged_in=logged_in)
+	return render_template('create_events.html', groups=groups, logged_in=logged_in)
 
 
 @app.route('/friends', methods=['GET', 'POST'])

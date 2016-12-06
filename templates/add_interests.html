@@ -19,18 +19,10 @@
                 <div class="col-lg-12">
                     {% include '_flash.html' %}
                     <form method="POST">
-                        <h2>Create a group!</h2> </br>
-                        Group Name: <input type="text" name="group_name" maxlength="20" required/> </br>
-                        Description: <input type="text" name="description" required/> </br>
-                        Interests:
-                        <select name="select_interests" multiple>
-                            {% for interest in interests %}
-                                <option value="{{ interest.category }}, {{ interest.keyword }}">
-                                    {{ interest.category }}, {{ interest.keyword }}
-                                </option>
-                            {% endfor %}
-                        </select> </br>
-                        <input type="submit" value="Create"/>
+                        <h2>Add your interests!</h2> </br>
+                        Category: <input type="text" name="category" maxlength="20" required/> </br>
+                        Keyword: <input type="text" name="keyword" maxlength="20" required/> </br>
+                        <input type="submit" value="Add"/>
                     </form>
                 </div>
             </div>
