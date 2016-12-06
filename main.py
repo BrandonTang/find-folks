@@ -119,14 +119,23 @@ def home():
 	return render_template('home.html', username=username, posts=data, logged_in=logged_in)
 
 
+@app.route('/create_groups', methods=['GET', 'POST'])
+def create_groups():
+	"""
+	Return the create_groups page that allows users to create groups.
+	"""
+
+
+
 @app.route('/create_events', methods=['GET', 'POST'])
 def create_events():
 	"""
-	Return the create_event page that calls the submit_event function on submit.
+	Return the create_event page that allows users to create events.
 	"""
 	logged_in = False
 	if session.get('logged_in') is True:
 		logged_in = True
+	# username = session.get('username')
 	if request.method == "POST":
 		title = request.form.get('title')
 		description = request.form.get('description')
@@ -180,19 +189,11 @@ def browse_events():
 	if session.get('logged_in') is True:
 		logged_in = True
 	cursor = conn.cursor()
-	query = 'SELECT username FROM member'
+	query = 'SELECT * FROM an_event'
 	cursor.execute(query)
-	all_users = cursor.fetchall()
+	events = cursor.fetchall()
 	cursor.close()
-	if request.method == 'POST':
-		select_user = request.form.getlist('select_user')[0]
-		cursor = conn.cursor()
-		query = 'SELECT category, keyword FROM interested_in WHERE username = %s'
-		cursor.execute(query, select_user)
-		user_tweets = cursor.fetchall()
-		cursor.close()
-		return render_template('browse_events.html', events=user_tweets, all_users=all_users, logged_in=logged_in)
-	return render_template('browse_events.html', all_users = all_users, logged_in=logged_in)
+	return render_template('browse_events.html', events=events, logged_in=logged_in)
 
 
 @app.route('/rate_events', methods=['GET', 'POST'])
@@ -212,7 +213,7 @@ def rate_events():
 	cursor.close()
 	for event_id in event_ids:
 		cursor = conn.cursor()
-		query = 'SELECT * FROM event WHERE eventid = %s'
+		query = 'SELECT * FROM an_event WHERE eventid = %s'
 		cursor.execute(query, event_id)
 		event_info = cursor.fetchone()
 		cursor.close()
