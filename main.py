@@ -6,11 +6,11 @@ import pymysql.cursors
 app = Flask(__name__)
 app.secret_key = 'secret_key'
 
-# conn = pymysql.connect(
+#conn = pymysql.connect(
 # 					   host='localhost',
 #                       user='root',
 #                       password='',
-#                       db='meetup3',
+#                       db='findfolks',
 #                       charset='utf8mb4',
 #                       cursorclass=pymysql.cursors.dictcursor
 #                       )
@@ -292,7 +292,7 @@ def groups():
     username = session.get('username')
     cursor = conn.cursor()
     # query that finds all groups with the same interest of the user
-    query = 'SELECT group_name, description FROM a_group g JOIN about a ON g.group_id = a.group_id JOIN interested_in i ON a.category = i.category AND a.keyword = i.keywordJOIN member m ON i.username = m.username WHERE m = %s'
+    query = 'SELECT group_name, description FROM a_group g JOIN about a ON g.group_id = a.group_id JOIN interested_in i ON a.category = i.category AND a.keyword = i.keyword JOIN member m ON i.username = m.username WHERE m = %s'
     cursor.execute(query, username)
     groups = cursor.fetchall()
     conn.commit()
