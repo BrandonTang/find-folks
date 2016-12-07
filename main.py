@@ -335,11 +335,21 @@ def browse_events():
     logged_in = False
     if session.get('logged_in') is True:
         logged_in = True
+    username = session.get('username')
     cursor = conn.cursor()
     query = 'SELECT * FROM an_event'
     cursor.execute(query)
     events = cursor.fetchall()
     cursor.close()
+    if request.method == "POST":
+        event_id = request.form.get('select_event')
+        cursor = conn.cursor()
+        query = 'INSERT INTO sign_up (event_id, username) VALUES (%s, %s)'
+        cursor.execute(query, (event_id, username))
+        conn.commit()
+        cursor.close()
+        flash("Successfully signed up for event!")
+        return redirect(url_for('browse_events'))
     return render_template('browse_events.html', events=events, logged_in=logged_in)
 
 

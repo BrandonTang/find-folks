@@ -19,6 +19,20 @@
                 <div class="col-lg-12">
                     {% include '_flash.html' %}
                     <h1>Browse and sign up for your favorite events!</h1> </br>
+                    <form name="sign_up" method="POST">
+                        Event: <select name="select_event">
+                        <option value="">Select Event</option>
+                        {% for event in events %}
+                            <option value="{{ event.event_id }}">
+                                {{ event.title }}, {{ event.description }}, {{ event.start_time }},
+                                {{ event.end_time }}, {{ event.location_name }}, {{ event.zipcode }}
+                            </option>
+                        {% endfor %}
+                    </select> </br>
+                        <input type="submit" value="Sign Up"/>
+                    </form>
+                    </br>
+
                     <style type="text/css">
                         table, th, td {
                             border: 1px solid black;
