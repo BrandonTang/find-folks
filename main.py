@@ -368,21 +368,25 @@ def rate_events():
     cursor.execute(query, username)
     event_ids = cursor.fetchall()
     cursor.close()
-    for event_id in event_ids:
+    for each_event_id in event_ids:
+        event_id = each_event_id['event_id']
         cursor = conn.cursor()
-        query = 'SELECT * FROM an_event WHERE eventid = %s'
+        query = 'SELECT * FROM an_event WHERE event_id = %s'
         cursor.execute(query, event_id)
         event_info = cursor.fetchone()
         cursor.close()
         events.append(event_info)
     if request.method == "POST":
-        event = request.form.getlist('select_event')[0]  # Grab event id
+        event_id = request.form.getlist('select_event')[0]
         rating = request.form.getlist('select_rating')[0]
+        print(event_id)
         cursor = conn.cursor()
-        query = 'UPDATE signup WITH rating'
-        cursor.execute(query, (username, event, rating))
+        query = 'UPDATE sign_up SET rating = %s WHERE event_id = %s AND username = %s'
+        cursor.execute(query, (rating, event_id, username))
         conn.commit()
         cursor.close()
+        flash("Successfully rated event!")
+        return redirect(url_for('rate_events'))
     return render_template('rate_events.html', events=events, logged_in=logged_in)
 
 

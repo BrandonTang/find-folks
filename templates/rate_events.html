@@ -23,13 +23,9 @@
                         Event: <select name="select_event">
                         <option value="">Select Event</option>
                         {% for event in events %}
-                            <option value="{{ event.id }}">
-                                Title: {{ event.title }} </br>
-                                Description: {{ event.description }} </br>
-                                Start Time: {{ event.start_time }} </br>
-                                End Time: {{ event.end_time }} </br>
-                                Location Name: {{ event.location_name }} </br>
-                                Zipcode: {{ event.zipcode }}
+                            <option value="{{ event.event_id }}">
+                                {{ event.title }}, {{ event.description }}, {{ event.start_time }},
+                                {{ event.end_time }}, {{ event.location_name }}, {{ event.zipcode }}
                             </option>
                         {% endfor %}
                     </select> </br>
