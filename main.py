@@ -379,7 +379,6 @@ def rate_events():
     if request.method == "POST":
         event_id = request.form.getlist('select_event')[0]
         rating = request.form.getlist('select_rating')[0]
-        print(event_id)
         cursor = conn.cursor()
         query = 'UPDATE sign_up SET rating = %s WHERE event_id = %s AND username = %s'
         cursor.execute(query, (rating, event_id, username))
@@ -401,7 +400,7 @@ def friends_events():
         logged_in = True
     username = session.get('username')
     cursor = conn.cursor()
-    query = 'SELECT * FROM friend WHERE friend_to = %s'
+    query = 'SELECT * FROM friend WHERE friend_of = %s'
     cursor.execute(query, username)
     friends_list = cursor.fetchall()
     cursor.close()
@@ -412,9 +411,10 @@ def friends_events():
         cursor.execute(query, friend)
         event_ids = cursor.fetchall()
         cursor.close()
-        for event_id in event_ids:
+        for each_event_id in event_ids:
+            event_id = each_event_id['event_id']
             cursor = conn.cursor()
-            query = 'SELECT * FROM event WHERE event_id = %s'
+            query = 'SELECT * FROM an_event WHERE event_id = %s'
             cursor.execute(query, event_id)
             event_info = cursor.fetchone()
             events.append(event_info)
