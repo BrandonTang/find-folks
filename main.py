@@ -308,11 +308,22 @@ def friends():
     logged_in = False
     if session.get('logged_in') is True:
         logged_in = True
+    username = session.get('username')
     cursor = conn.cursor()
     query = 'SELECT * FROM member'
     cursor.execute(query)
     members = cursor.fetchall()
+    conn.commit()
     cursor.close()
+    if request.method == "POST":
+        friend = request.form.get('select_member')
+        cursor = conn.cursor()
+        query = 'INSERT INTO friend (friend_of, friend_to) VALUES (%s, %s)'
+        cursor.execute(query, (username, friend))
+        conn.commit()
+        cursor.close()
+        flash("Successfully added friend!")
+        return redirect(url_for('friends'))
     return render_template('friends.html', members=members, logged_in=logged_in)
 
 
