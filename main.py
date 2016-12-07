@@ -310,8 +310,8 @@ def friends():
         logged_in = True
     username = session.get('username')
     cursor = conn.cursor()
-    query = 'SELECT * FROM member'
-    cursor.execute(query)
+    query = 'SELECT * FROM member WHERE username NOT IN (SELECT friend_to FROM friend WHERE friend_of = %s)'
+    cursor.execute(query, username)
     members = cursor.fetchall()
     conn.commit()
     cursor.close()
