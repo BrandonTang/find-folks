@@ -291,12 +291,20 @@ def groups():
         logged_in = True
     username = session.get('username')
     cursor = conn.cursor()
-    # query that finds all groups with the same interest of the user
-    query = 'SELECT group_name, description FROM a_group g JOIN about a ON g.group_id = a.group_id JOIN interested_in i ON a.category = i.category AND a.keyword = i.keyword JOIN member m ON i.username = m.username WHERE m = %s'
-    cursor.execute(query, username)
+    query = 'SELECT * FROM a_group'
+    cursor.execute(query)
     groups = cursor.fetchall()
     conn.commit()
     cursor.close()
+    if request.method == "POST":
+        group_id = request.form.get('select_group')
+        cursor = conn.cursor()
+        query = 'INSERT INTO belongs_to (group_id, username) VALUES (%s, %s)'
+        cursor.execute(query, (group_id, username))
+        conn.commit()
+        cursor.close()
+        flash("Successfully joined group!")
+        return redirect(url_for('groups'))
     return render_template('groups.html', groups=groups, logged_in=logged_in)
 
 
