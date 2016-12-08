@@ -38,6 +38,26 @@
                     </select> </br>
                         <input type="submit" value="Rate"/>
                     </form>
+
+                    <style type="text/css">
+                        table, th, td {
+                            border: 1px solid black;
+                        }
+                    </style>
+
+                    <h3>Ratings</h3>
+
+                    <table>
+                        <th>Event Name</th>
+                        <th>Rating</th>
+
+                        {% for line in ratings %}
+                            <tr>
+                                <td>{{ line.title }}</td>
+                                <td>{{ line.rating }}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
                 </div>
             </div>
         </div>
