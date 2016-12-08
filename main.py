@@ -302,13 +302,21 @@ def create_events():
     groups = cursor.fetchall()
     conn.commit()
     cursor.close()
+    cursor = conn.cursor()
+    query = 'SELECT * FROM location'
+    cursor.execute(query)
+    locations = cursor.fetchall()
+    conn.commit()
+    cursor.close()
     if request.method == "POST":
         title = request.form.get('title')
         description = request.form.get('description')
         start_time = request.form.get('start_time')
         end_time = request.form.get('end_time')
-        location_name = request.form.get('location_name')
-        zipcode = int(request.form.get('zipcode'))
+        location = request.form.getlist('location')[0]
+        location = location.split(', ')
+        location_name = location[0]
+        zipcode = location[1]
         select_group = request.form.getlist('select_group')[0]
         cursor = conn.cursor()
         query1 = 'INSERT INTO an_event (title, description, start_time, end_time, location_name, zipcode) VALUES (%s, %s, %s, %s, %s, %s)'
@@ -330,7 +338,7 @@ def create_events():
         cursor.close()
         flash('Event successfully created!', category='success')
         return redirect(url_for('create_events'))
-    return render_template('create_events.html', groups=groups, logged_in=logged_in)
+    return render_template('create_events.html', groups=groups, locations=locations, logged_in=logged_in)
 
 
 @app.route('/groups', methods=['GET', 'POST'])

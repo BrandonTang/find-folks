@@ -24,8 +24,14 @@
                         Description: <input type="text" name="description" required/> </br>
                         Start Time: <input type="date" name="start_time" required/> </br>
                         End Time: <input type="date" name="end_time" required/> </br>
-                        Location Name: <input type="text" name="location_name" maxlength="20" required/> </br>
-                        ZipCode: <input type="text" name="zipcode" maxlength="5" required/> </br>
+                        Locations: <select name="location">
+                        <option value="">Select Location</option>
+                        {% for location in locations %}
+                            <option value="{{ location.location_name }}, {{ location.zipcode }}">
+                                {{ location.location_name }}, {{ location.zipcode }}
+                            </option>
+                        {% endfor %}
+                    </select> </br>
                         Group:
                         <select name="select_group">
                             {% for group in groups %}
