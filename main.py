@@ -472,7 +472,6 @@ def friends_events():
     """
     Return the friends_events page that allows users to view events their friends signed up for.
     """
-    events = []
     logged_in = False
     if session.get('logged_in') is True:
         logged_in = True
@@ -485,18 +484,10 @@ def friends_events():
     if request.method == "POST":
         friend = request.form.getlist('select_friend')[0]
         cursor = conn.cursor()
-        query = 'SELECT event_id FROM sign_up WHERE username = %s'
+        query = 'SELECT * FROM sign_up JOIN an_event USING (event_id) WHERE username = %s'
         cursor.execute(query, friend)
-        event_ids = cursor.fetchall()
+        events = cursor.fetchall()
         cursor.close()
-        for each_event_id in event_ids:
-            event_id = each_event_id['event_id']
-            cursor = conn.cursor()
-            query = 'SELECT * FROM an_event WHERE event_id = %s'
-            cursor.execute(query, event_id)
-            event_info = cursor.fetchone()
-            events.append(event_info)
-            cursor.close()
         return render_template('friends_events.html', events=events, friends=friends_list, logged_in=logged_in)
     return render_template('friends_events.html', friends=friends_list, logged_in=logged_in)
 
