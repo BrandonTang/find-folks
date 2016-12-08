@@ -173,34 +173,21 @@ def filter_events():
     range_start_date = str(range_start_date) + " 00:00:00"
     range_end_date = str(range_end_date) + " 00:00:00"
     cursor = conn.cursor()
-    query = 'SELECT * FROM an_event NATURAL JOIN sign_up NATURAL JOIN organize WHERE username = %s AND start_time BETWEEN %s AND %s'
+    query = 'SELECT * FROM (an_event NATURAL JOIN sign_up NATURAL JOIN organize) JOIN a_group USING (group_id) WHERE username = %s AND start_time BETWEEN %s AND %s'
     cursor.execute(query, (username, range_start_date, range_end_date))
     events = cursor.fetchall()
     conn.commit()
     cursor.close()
-    for event in events:
-        group_id = event['group_id']
-        cursor = conn.cursor()
-        query = 'SELECT group_name FROM a_group WHERE group_id = %s'
-        cursor.execute(query, group_id)
-        group_name = cursor.fetchone()
-        conn.commit()
-        cursor.close()
-        event['group_name'] = event.pop('group_id')
-        event['group_name'] = group_name['group_name']
     if request.method == "POST":
         start_time = request.form.get('start_time')
         end_time = request.form.get('end_time')
         group_name = request.form.getlist('select_group')[0]
         cursor = conn.cursor()
-        query = 'SELECT * FROM an_event NATURAL JOIN sign_up NATURAL JOIN organize WHERE username = %s AND start_time BETWEEN %s AND %s'
+        query = 'SELECT * FROM (an_event NATURAL JOIN sign_up NATURAL JOIN organize) JOIN a_group USING (group_id) WHERE username = %s AND start_time BETWEEN %s AND %s'
         cursor.execute(query, (username, start_time, end_time))
         events = cursor.fetchall()
         conn.commit()
         cursor.close()
-        for event in events:
-            event['group_name'] = event.pop('group_id')
-            event['group_name'] = group_name
         return render_template('filter_events.html', username=username, events=events, groups=groups,
                                logged_in=logged_in)
     return render_template('filter_events.html', username=username, events=events, groups=groups, logged_in=logged_in)
@@ -310,22 +297,11 @@ def create_events():
         logged_in = True
     username = session.get('username')
     cursor = conn.cursor()
-    query = 'SELECT group_id FROM belongs_to WHERE username = %s AND authorized = 1'
+    query = 'SELECT * FROM belongs_to JOIN a_group USING (group_id) WHERE username = %s AND authorized = 1'
     cursor.execute(query, username)
-    group_ids = cursor.fetchall()
+    groups = cursor.fetchall()
     conn.commit()
     cursor.close()
-    groups = []
-    for each_group_id in group_ids:
-        group_id = each_group_id['group_id']
-        cursor = conn.cursor()
-        query = 'SELECT group_name FROM a_group WHERE group_id = %s'
-        cursor.execute(query, group_id)
-        group_name = cursor.fetchone()
-        each_group_name = group_name['group_name']
-        groups.append(each_group_name)
-        conn.commit()
-        cursor.close()
     if request.method == "POST":
         title = request.form.get('title')
         description = request.form.get('description')
@@ -333,7 +309,7 @@ def create_events():
         end_time = request.form.get('end_time')
         location_name = request.form.get('location_name')
         zipcode = int(request.form.get('zipcode'))
-        select_group = request.form.getlist('select_group')
+        select_group = request.form.getlist('select_group')[0]
         cursor = conn.cursor()
         query1 = 'INSERT INTO an_event (title, description, start_time, end_time, location_name, zipcode) VALUES (%s, %s, %s, %s, %s, %s)'
         cursor.execute(query1, (title, description, start_time, end_time, location_name, zipcode))
@@ -399,6 +375,12 @@ def friends():
     members = cursor.fetchall()
     conn.commit()
     cursor.close()
+    cursor = conn.cursor()
+    query = 'SELECT friend_to FROM friend WHERE friend_of = %s'
+    cursor.execute(query, username)
+    friends = cursor.fetchall()
+    conn.commit()
+    cursor.close()
     if request.method == "POST":
         friend = request.form.get('select_member')
         cursor = conn.cursor()
@@ -408,7 +390,7 @@ def friends():
         cursor.close()
         flash("Successfully added friend!")
         return redirect(url_for('friends'))
-    return render_template('friends.html', members=members, logged_in=logged_in)
+    return render_template('friends.html', members=members, friends=friends, logged_in=logged_in)
 
 
 @app.route('/browse_events', methods=['GET', 'POST'])

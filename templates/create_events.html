@@ -29,8 +29,8 @@
                         Group:
                         <select name="select_group">
                             {% for group in groups %}
-                                <option value="{{ group }}">
-                                    {{ group }}
+                                <option value="{{ group.group_name }}">
+                                    {{ group.group_name }}
                                 </option>
                             {% endfor %}
                         </select> </br>
