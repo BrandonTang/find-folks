@@ -20,7 +20,7 @@
                     {% include '_flash.html' %}
                     <h1>Add your friends!</h1> </br>
                     <form name="add_friends" method="POST">
-                        Event: <select name="select_member">
+                        Members: <select name="select_member">
                         <option value="">Select Member</option>
                         {% for member in members %}
                             <option value="{{ member.username }}">
