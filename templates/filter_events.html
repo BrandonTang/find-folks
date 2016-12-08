@@ -26,24 +26,38 @@
                     </style>
 
                     <table>
+                        <th>Event ID</th>
                         <th>Title</th>
-                        <th>Description</th>
                         <th>Start Time</th>
                         <th>End Time</th>
-                        <th>Location Name</th>
                         <th>ZipCode</th>
+                        <th>Group</th>
 
                         {% for line in events %}
                             <tr>
+                                <td>{{ line.event_id }}</td>
                                 <td>{{ line.title }}</td>
-                                <td>{{ line.description }}</td>
                                 <td>{{ line.start_time }}</td>
-                                <td>{{ line.end_time }}</td>
                                 <td>{{ line.location_name }}</td>
                                 <td>{{ line.zipcode }}</td>
+                                <td>{{ line.group_name }}</td>
                             </tr>
                         {% endfor %}
                     </table>
+                    </br>
+                    <form name="filter_events" method="POST">
+                        Start Time: <input type="date" name="start_time" required/> </br>
+                        End Time: <input type="date" name="end_time" required/> </br>
+                        Group:
+                        <select name="select_group">
+                            {% for group in groups %}
+                                <option value="{{ group.group_name }}">
+                                    {{ group.group_name }}, {{ group.description }}
+                                </option>
+                            {% endfor %}
+                        </select> </br>
+                        <input type="submit" value="Filter"/>
+                    </form>
                 </div>
             </div>
         </div>

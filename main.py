@@ -162,16 +162,48 @@ def filter_events():
     if session.get('logged_in') is True:
         logged_in = True
     username = session.get('username')
+    cursor = conn.cursor()
+    query = 'SELECT * FROM a_group'
+    cursor.execute(query)
+    groups = cursor.fetchall()
+    conn.commit()
+    cursor.close()
     range_start_date = datetime.date.today()
     range_end_date = range_start_date + datetime.timedelta(days=3)
     range_start_date = str(range_start_date) + " 00:00:00"
     range_end_date = str(range_end_date) + " 00:00:00"
     cursor = conn.cursor()
-    query = 'SELECT * FROM an_event NATURAL JOIN sign_up WHERE username = %s AND start_time BETWEEN %s AND %s'
+    query = 'SELECT * FROM an_event NATURAL JOIN sign_up NATURAL JOIN organize WHERE username = %s AND start_time BETWEEN %s AND %s'
     cursor.execute(query, (username, range_start_date, range_end_date))
     events = cursor.fetchall()
+    conn.commit()
     cursor.close()
-    return render_template('filter_events.html', username=username, events=events, logged_in=logged_in)
+    for event in events:
+        group_id = event['group_id']
+        cursor = conn.cursor()
+        query = 'SELECT group_name FROM a_group WHERE group_id = %s'
+        cursor.execute(query, group_id)
+        group_name = cursor.fetchone()
+        conn.commit()
+        cursor.close()
+        event['group_name'] = event.pop('group_id')
+        event['group_name'] = group_name['group_name']
+    if request.method == "POST":
+        start_time = request.form.get('start_time')
+        end_time = request.form.get('end_time')
+        group_name = request.form.getlist('select_group')[0]
+        cursor = conn.cursor()
+        query = 'SELECT * FROM an_event NATURAL JOIN sign_up NATURAL JOIN organize WHERE username = %s AND start_time BETWEEN %s AND %s'
+        cursor.execute(query, (username, start_time, end_time))
+        events = cursor.fetchall()
+        conn.commit()
+        cursor.close()
+        for event in events:
+            event['group_name'] = event.pop('group_id')
+            event['group_name'] = group_name
+        return render_template('filter_events.html', username=username, events=events, groups=groups,
+                               logged_in=logged_in)
+    return render_template('filter_events.html', username=username, events=events, groups=groups, logged_in=logged_in)
 
 
 @app.route('/add_interests', methods=['GET', 'POST'])
