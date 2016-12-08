@@ -13,7 +13,7 @@ app.secret_key = 'secret_key'
 #                       password='',
 #                       db='findfolks',
 #                       charset='utf8mb4',
-#                       cursorclass=pymysql.cursors.dictcursor
+#                       cursorclass=pymysql.cursors.DictCursor
 #                       )
 
 # Configure MySQL
