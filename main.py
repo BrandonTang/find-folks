@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, session, url_for, redirect, flash
 import hashlib
 import pymysql.cursors
+import datetime
 
 # Initialize the app from Flask
 app = Flask(__name__)
@@ -27,14 +28,47 @@ conn = pymysql.connect(
 )
 
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def index():
     """
     Return the home page for users not logged in.
     """
     if session.get('logged_in') is True:
         return redirect(url_for('home'))
-    return render_template('index.html')
+    range_start_date = datetime.date.today()
+    range_end_date = range_start_date + datetime.timedelta(days=3)
+    range_start_date = str(range_start_date) + " 00:00:00"
+    range_end_date = str(range_end_date) + " 00:00:00"
+    cursor = conn.cursor()
+    query = 'SELECT * FROM an_event WHERE start_time BETWEEN %s AND %s'
+    cursor.execute(query, (range_start_date, range_end_date))
+    events = cursor.fetchall()
+    cursor.close()
+    cursor = conn.cursor()
+    query = 'SELECT * FROM a_group'
+    cursor.execute(query)
+    conn.commit()
+    groups = cursor.fetchall()
+    cursor.close()
+    cursor = conn.cursor()
+    query = 'SELECT * FROM interest'
+    cursor.execute(query)
+    interests = cursor.fetchall()
+    conn.commit()
+    cursor.close()
+    if request.method == "POST":
+        interest = request.form.get('select_interest')
+        interest = interest.split(', ')
+        category = interest[0]
+        keyword = interest[1]
+        cursor = conn.cursor()
+        query = 'SELECT * FROM a_group NATURAL JOIN about WHERE category = %s AND keyword = %s'
+        cursor.execute(query, (category, keyword))
+        groups = cursor.fetchall()
+        conn.commit()
+        cursor.close()
+        return render_template('index.html', events=events, groups=groups, interests=interests)
+    return render_template('index.html', events=events, groups=groups, interests=interests)
 
 
 @app.route('/login')
@@ -122,12 +156,16 @@ def home():
     """
     username = session['username']
     logged_in = session['logged_in']
+    range_start_date = datetime.date.today()
+    range_end_date = range_start_date + datetime.timedelta(days=3)
+    range_start_date = str(range_start_date) + " 00:00:00"
+    range_end_date = str(range_end_date) + " 00:00:00"
     cursor = conn.cursor()
-    query = 'SELECT category, keyword FROM interested_in WHERE username = %s'
-    cursor.execute(query, username)
-    data = cursor.fetchall()
+    query = 'SELECT * FROM an_event WHERE start_time BETWEEN %s AND %s'
+    cursor.execute(query, (range_start_date, range_end_date))
+    events = cursor.fetchall()
     cursor.close()
-    return render_template('home.html', username=username, posts=data, logged_in=logged_in)
+    return render_template('home.html', username=username, events=events, logged_in=logged_in)
 
 
 @app.route('/add_interests', methods=['GET', 'POST'])

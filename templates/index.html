@@ -20,6 +20,61 @@
                     {% include '_flash.html' %}
                     <h1>Welcome to FindFolks!</h1>
                     <p>FindFolks Description</p> </br>
+
+                    <h3>Upcoming Events</h3>
+                    <style type="text/css">
+                        table, th, td {
+                            border: 1px solid black;
+                        }
+                    </style>
+
+                    <table>
+                        <th>Title</th>
+                        <th>Description</th>
+                        <th>Start Time</th>
+                        <th>End Time</th>
+                        <th>Location Name</th>
+                        <th>ZipCode</th>
+
+                        {% for line in events %}
+                            <tr>
+                                <td>{{ line.title }}</td>
+                                <td>{{ line.description }}</td>
+                                <td>{{ line.start_time }}</td>
+                                <td>{{ line.end_time }}</td>
+                                <td>{{ line.location_name }}</td>
+                                <td>{{ line.zipcode }}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                    </br>
+
+                    <h3>Filter Groups By Interest</h3>
+                    <form name="filter_groups" method="POST">
+                        Interests:
+                        <select name="select_interest">
+                            {% for interest in interests %}
+                                <option value="{{ interest.category }}, {{ interest.keyword }}">
+                                    {{ interest.category }}, {{ interest.keyword }}
+                                </option>
+                            {% endfor %}
+                        </select> </br>
+                        <input type="submit" value="Filter"/>
+                    </form>
+                    </br>
+
+                    <table>
+                        <th>Group Name</th>
+                        <th>Description</th>
+
+                        {% for line in groups %}
+                            <tr>
+                                <td>{{ line.group_name }}</td>
+                                <td>{{ line.description }}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                    </br>
                 </div>
             </div>
         </div>

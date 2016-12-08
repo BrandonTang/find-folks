@@ -20,6 +20,31 @@
                     {% include '_flash.html' %}
                     <h1>Welcome {{ username }}!</h1> </br>
                     <h3>Here are your upcoming events.</h3> </br>
+                    <style type="text/css">
+                        table, th, td {
+                            border: 1px solid black;
+                        }
+                    </style>
+
+                    <table>
+                        <th>Title</th>
+                        <th>Description</th>
+                        <th>Start Time</th>
+                        <th>End Time</th>
+                        <th>Location Name</th>
+                        <th>ZipCode</th>
+
+                        {% for line in events %}
+                            <tr>
+                                <td>{{ line.title }}</td>
+                                <td>{{ line.description }}</td>
+                                <td>{{ line.start_time }}</td>
+                                <td>{{ line.end_time }}</td>
+                                <td>{{ line.location_name }}</td>
+                                <td>{{ line.zipcode }}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
                 </div>
             </div>
         </div>
