@@ -7,7 +7,7 @@ import datetime
 app = Flask(__name__)
 app.secret_key = 'secret_key'
 
-#conn = pymysql.connect(
+# conn = pymysql.connect(
 # 					   host='localhost',
 #                       user='root',
 #                       password='',
@@ -31,10 +31,12 @@ conn = pymysql.connect(
 @app.route('/', methods=['GET', 'POST'])
 def index():
     """
-    Return the home page for users not logged in.
+    Return the home page for users.
     """
+    logged_in = False
     if session.get('logged_in') is True:
-        return redirect(url_for('home'))
+        logged_in = True
+    username = session.get('username')
     range_start_date = datetime.date.today()
     range_end_date = range_start_date + datetime.timedelta(days=3)
     range_start_date = str(range_start_date) + " 00:00:00"
@@ -67,8 +69,10 @@ def index():
         groups = cursor.fetchall()
         conn.commit()
         cursor.close()
-        return render_template('index.html', events=events, groups=groups, interests=interests)
-    return render_template('index.html', events=events, groups=groups, interests=interests)
+        return render_template('index.html', events=events, groups=groups, interests=interests, logged_in=logged_in,
+                               username=username)
+    return render_template('index.html', events=events, groups=groups, interests=interests, logged_in=logged_in,
+                           username=username)
 
 
 @app.route('/login')
@@ -96,7 +100,7 @@ def login_auth():
         session['username'] = username
         session['logged_in'] = True
         flash('User successfully logged in!', category='success')
-        return redirect(url_for('home'))
+        return redirect(url_for('index'))
     else:
         flash('Invalid login or username or password.', category='error')
         return redirect(url_for('login'))
@@ -149,23 +153,25 @@ def logout():
     return redirect('/')
 
 
-@app.route('/home')
-def home():
+@app.route('/filter_events', methods=['GET', 'POST'])
+def filter_events():
     """
     Return the homepage that shows upcoming events for current day and next three days.
     """
-    username = session['username']
-    logged_in = session['logged_in']
+    logged_in = False
+    if session.get('logged_in') is True:
+        logged_in = True
+    username = session.get('username')
     range_start_date = datetime.date.today()
     range_end_date = range_start_date + datetime.timedelta(days=3)
     range_start_date = str(range_start_date) + " 00:00:00"
     range_end_date = str(range_end_date) + " 00:00:00"
     cursor = conn.cursor()
-    query = 'SELECT * FROM an_event WHERE start_time BETWEEN %s AND %s'
-    cursor.execute(query, (range_start_date, range_end_date))
+    query = 'SELECT * FROM an_event NATURAL JOIN sign_up WHERE username = %s AND start_time BETWEEN %s AND %s'
+    cursor.execute(query, (username, range_start_date, range_end_date))
     events = cursor.fetchall()
     cursor.close()
-    return render_template('home.html', username=username, events=events, logged_in=logged_in)
+    return render_template('filter_events.html', username=username, events=events, logged_in=logged_in)
 
 
 @app.route('/add_interests', methods=['GET', 'POST'])
