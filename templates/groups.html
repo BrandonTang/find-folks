@@ -28,7 +28,40 @@
                     </select> </br>
                         <input type="submit" value="Join"/>
                     </form>
-                    </br>
+
+                    <style type="text/css">
+                        table, th, td {
+                            border: 1px solid black;
+                        }
+                    </style>
+
+                    <H3>Groups Available To Join</H3>
+
+                    <table>
+                        <th>Group Name</th>
+                        <th>Description</th>
+
+                        {% for line in groups %}
+                            <tr>
+                                <td>{{ line.group_name }}</td>
+                                <td>{{ line.description }}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+
+                    <H3>Your Groups</H3>
+
+                    <table>
+                        <th>Group Name</th>
+                        <th>Description</th>
+
+                        {% for line in your_groups %}
+                            <tr>
+                                <td>{{ line.group_name }}</td>
+                                <td>{{ line.description }}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
                 </div>
             </div>
         </div>

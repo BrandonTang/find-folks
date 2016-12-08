@@ -357,9 +357,15 @@ def groups():
         logged_in = True
     username = session.get('username')
     cursor = conn.cursor()
-    query = 'SELECT * FROM a_group'
-    cursor.execute(query)
+    query = 'SELECT * FROM belongs_to JOIN a_group USING (group_id) WHERE username != %s AND group_id NOT IN (SELECT group_id FROM belongs_to JOIN a_group USING (group_id) WHERE username = %s)'
+    cursor.execute(query, (username, username))
     groups = cursor.fetchall()
+    conn.commit()
+    cursor.close()
+    cursor = conn.cursor()
+    query = 'SELECT * FROM belongs_to JOIN a_group USING (group_id) WHERE username = %s'
+    cursor.execute(query, username)
+    your_groups = cursor.fetchall()
     conn.commit()
     cursor.close()
     if request.method == "POST":
@@ -371,7 +377,7 @@ def groups():
         cursor.close()
         flash("Successfully joined group!")
         return redirect(url_for('groups'))
-    return render_template('groups.html', groups=groups, logged_in=logged_in)
+    return render_template('groups.html', groups=groups, your_groups=your_groups, logged_in=logged_in)
 
 
 @app.route('/friends', methods=['GET', 'POST'])
