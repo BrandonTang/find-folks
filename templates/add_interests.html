@@ -24,6 +24,25 @@
                         Keyword: <input type="text" name="keyword" maxlength="20" required/> </br>
                         <input type="submit" value="Add"/>
                     </form>
+                    <style type="text/css">
+                        table, th, td {
+                            border: 1px solid black;
+                        }
+                    </style>
+
+                    <h3>Your Interests</h3>
+
+                    <table>
+                        <th>Category</th>
+                        <th>Keyword</th>
+
+                        {% for line in interests %}
+                            <tr>
+                                <td>{{ line.category }}</td>
+                                <td>{{ line.keyword }}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
                 </div>
             </div>
         </div>

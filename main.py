@@ -199,6 +199,12 @@ def add_interests():
     if session.get('logged_in') is True:
         logged_in = True
     username = session.get('username')
+    cursor = conn.cursor()
+    query = 'SELECT * FROM interested_in WHERE username = %s'
+    cursor.execute(query, username)
+    interests = cursor.fetchall()
+    conn.commit()
+    cursor.close()
     if request.method == "POST":
         category = request.form.get('category')
         keyword = request.form.get('keyword')
@@ -229,7 +235,7 @@ def add_interests():
             cursor.close()
             flash("New interest for member has been added!")
         return redirect(url_for('add_interests'))
-    return render_template('add_interests.html', logged_in=logged_in)
+    return render_template('add_interests.html', interests=interests, logged_in=logged_in)
 
 
 @app.route('/create_groups', methods=['GET', 'POST'])
