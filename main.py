@@ -183,8 +183,8 @@ def filter_events():
         end_time = request.form.get('end_time')
         group_name = request.form.getlist('select_group')[0]
         cursor = conn.cursor()
-        query = 'SELECT * FROM (an_event NATURAL JOIN sign_up NATURAL JOIN organize) JOIN a_group USING (group_id) WHERE username = %s AND start_time BETWEEN %s AND %s'
-        cursor.execute(query, (username, start_time, end_time))
+        query = 'SELECT * FROM (an_event NATURAL JOIN sign_up NATURAL JOIN organize) JOIN a_group USING (group_id) WHERE username = %s AND group_name = %s AND start_time BETWEEN %s AND %s'
+        cursor.execute(query, (username, group_name, start_time, end_time))
         events = cursor.fetchall()
         conn.commit()
         cursor.close()
