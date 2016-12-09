@@ -20,6 +20,14 @@
                     {% include '_flash.html' %}
                     <h1>Create an event!</h1> </br>
                     <form name="create_event" method="POST">
+                        Group:
+                        <select name="select_group">
+                            {% for group in groups %}
+                                <option value="{{ group.group_name }}">
+                                    {{ group.group_name }}
+                                </option>
+                            {% endfor %}
+                        </select> </br>
                         Title: <input type="text" name="title" maxlength="100" required/> </br>
                         Description: <input type="text" name="description" required/> </br>
                         Start Time: <input type="date" name="start_time" required/> </br>
@@ -32,14 +40,6 @@
                             </option>
                         {% endfor %}
                     </select> </br>
-                        Group:
-                        <select name="select_group">
-                            {% for group in groups %}
-                                <option value="{{ group.group_name }}">
-                                    {{ group.group_name }}
-                                </option>
-                            {% endfor %}
-                        </select> </br>
                         <input type="submit" value="Create"/>
                     </form>
                 </div>
