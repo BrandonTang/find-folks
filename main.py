@@ -458,7 +458,6 @@ def rate_events():
     query = 'SELECT title, avg(rating) rating FROM sign_up JOIN an_event USING (event_id) WHERE rating != 0 GROUP BY title'
     cursor.execute(query)
     ratings = cursor.fetchall()
-    print(ratings)
     conn.commit()
     cursor.close()
     if request.method == "POST":
