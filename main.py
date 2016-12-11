@@ -466,9 +466,11 @@ def rate_events():
     if session.get('logged_in') is True:
         logged_in = True
     username = session.get('username')
+    range_start_date = datetime.date.today()
+    range_start_date = str(range_start_date) + " 00:00:00"
     cursor = conn.cursor()
-    query = 'SELECT * FROM sign_up JOIN an_event USING (event_id) WHERE username = %s'
-    cursor.execute(query, username)
+    query = 'SELECT * FROM sign_up JOIN an_event USING (event_id) WHERE username = %s AND end_time < %s'
+    cursor.execute(query, (username, range_start_date))
     events = cursor.fetchall()
     conn.commit()
     cursor.close()
