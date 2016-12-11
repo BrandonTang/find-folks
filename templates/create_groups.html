@@ -30,6 +30,14 @@
                                 </option>
                             {% endfor %}
                         </select> </br>
+                        Locations: <select name="location">
+                        <option value="">Select Location</option>
+                        {% for location in locations %}
+                            <option value="{{ location.location_name }}, {{ location.zipcode }}">
+                                {{ location.location_name }}, {{ location.zipcode }}
+                            </option>
+                        {% endfor %}
+                    </select> </br>
                         <input type="submit" value="Create"/>
                     </form>
                 </div>

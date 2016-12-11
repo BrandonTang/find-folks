@@ -40,11 +40,13 @@
                     <table>
                         <th>Group Name</th>
                         <th>Description</th>
+                        <th>Group Location</th>
 
                         {% for line in groups %}
                             <tr>
                                 <td>{{ line.group_name }}</td>
                                 <td>{{ line.description }}</td>
+                                <td>{{ line.location_name }}, {{ line.zipcode }}</td>
                             </tr>
                         {% endfor %}
                     </table>
@@ -54,11 +56,13 @@
                     <table>
                         <th>Group Name</th>
                         <th>Description</th>
+                        <th>Group Location</th>
 
                         {% for line in your_groups %}
                             <tr>
                                 <td>{{ line.group_name }}</td>
                                 <td>{{ line.description }}</td>
+                                <td>{{ line.location_name }}, {{ line.zipcode }}</td>
                             </tr>
                         {% endfor %}
                     </table>

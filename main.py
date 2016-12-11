@@ -253,12 +253,22 @@ def create_groups():
     interests = cursor.fetchall()
     conn.commit()
     cursor.close()
+    cursor = conn.cursor()
+    query = 'SELECT * FROM location'
+    cursor.execute(query)
+    locations = cursor.fetchall()
+    conn.commit()
+    cursor.close()
     if request.method == "POST":
         interest_categories = []
         interest_keywords = []
         group_name = request.form.get('group_name')
         description = request.form.get('description')
         interest_list = request.form.getlist('select_interests')
+        location = request.form.getlist('location')[0]
+        location = location.split(', ')
+        location_name = location[0]
+        zipcode = location[1]
         for each_interest in interest_list:
             interest = each_interest.split(', ')
             interest_categories.append(interest[0])
@@ -276,6 +286,12 @@ def create_groups():
         created_group_id = group_id['group_id']
         conn.commit()
         cursor.close()
+        cursor = conn.cursor()
+        query = 'INSERT INTO meets_at (group_id, location_name, zipcode) VALUES (%s, %s, %s)'
+        cursor.execute(query, (created_group_id, location_name, zipcode))
+        conn.commit()
+        cursor.close()
+        flash("Group location has been updated!")
         for category, keyword in zip(interest_categories, interest_keywords):
             cursor = conn.cursor()
             query = 'INSERT INTO about (category, keyword, group_id) VALUES (%s, %s, %s)'
@@ -290,7 +306,7 @@ def create_groups():
         cursor.close()
         flash("You have been added as an authorized user to the group!")
         return redirect(url_for('create_groups'))
-    return render_template('create_groups.html', interests=interests, logged_in=logged_in)
+    return render_template('create_groups.html', locations=locations, interests=interests, logged_in=logged_in)
 
 
 @app.route('/create_events', methods=['GET', 'POST'])
@@ -357,13 +373,13 @@ def groups():
         logged_in = True
     username = session.get('username')
     cursor = conn.cursor()
-    query = 'SELECT * FROM belongs_to JOIN a_group USING (group_id) WHERE username != %s AND group_id NOT IN (SELECT group_id FROM belongs_to JOIN a_group USING (group_id) WHERE username = %s)'
+    query = 'SELECT * FROM belongs_to JOIN (a_group NATURAL JOIN meets_at) USING (group_id) WHERE username != %s AND group_id NOT IN (SELECT group_id FROM belongs_to JOIN a_group USING (group_id) WHERE username = %s)'
     cursor.execute(query, (username, username))
     groups = cursor.fetchall()
     conn.commit()
     cursor.close()
     cursor = conn.cursor()
-    query = 'SELECT * FROM belongs_to JOIN a_group USING (group_id) WHERE username = %s'
+    query = 'SELECT * FROM belongs_to JOIN (a_group NATURAL JOIN meets_at) USING (group_id) WHERE username = %s'
     cursor.execute(query, username)
     your_groups = cursor.fetchall()
     conn.commit()
