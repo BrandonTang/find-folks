@@ -20,7 +20,7 @@ conn = pymysql.connect(
 
 
 # Configure MySQL for Windows
-# conn = pymysql.connect(
+#conn = pymysql.connect(
 #     host='localhost',
 #     user='root',
 #     password='',
@@ -403,7 +403,7 @@ def groups():
     if request.method == "POST":
         group_id = request.form.get('select_group')
         cursor = conn.cursor()
-        query = 'INSERT INTO belongs_to (group_id, username) VALUES (%s, %s)'
+        query = 'INSERT INTO belongs_to (group_id, username, authorized) VALUES (%s, %s, 0)'
         cursor.execute(query, (group_id, username))
         conn.commit()
         cursor.close()
@@ -491,8 +491,12 @@ def rate_events():
     conn.commit()
     cursor.close()
     cursor = conn.cursor()
-    query = 'SELECT title, avg(rating) rating FROM sign_up JOIN an_event USING (event_id) WHERE rating != 0 GROUP BY title'
-    cursor.execute(query)
+    range_end_date = datetime.date.today()
+    range_start_date = range_end_date + datetime.timedelta(days=-3)
+    range_end_date = str(range_end_date) + " 00:00:00"
+    range_start_date = str(range_start_date) + " 00:00:00"
+    query = 'SELECT event_id, title, avg(rating) as average_rating FROM sign_up JOIN an_event USING (event_id) JOIN organize USING (event_id) JOIN a_group USING (group_id) JOIN belongs_to USING (username) WHERE rating != NULL AND username = %s AND end_time BETWEEN %s AND %s GROUP BY event_id, title'
+    cursor.execute(query, (username, range_start_date, range_end_date))
     ratings = cursor.fetchall()
     conn.commit()
     cursor.close()

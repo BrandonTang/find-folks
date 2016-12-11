@@ -1,4 +1,17 @@
 <!DOCTYPE html>
+<script type="text/javascript">
+    function checkEventSelected() {
+        if (document.getElementById("select_event").length == 1) {
+            alert("You'll need to sign up for an event before rating!");
+            return false;
+        }
+        if (document.getElementById("select_event").selectedIndex == 0) {
+            alert("Please select an event to rate.");
+            return false;
+        }
+        return true;
+    }
+</script>
 <html>
 
 <head>
@@ -19,8 +32,8 @@
                 <div class="col-lg-12">
                     {% include '_flash.html' %}
                     <h1>Rate events!</h1> </br>
-                    <form name="rate_events" method="POST">
-                        Event: <select name="select_event">
+                    <form name="rate_events" method="POST" onsubmit="return checkEventSelected()">
+                        Event: <select id ="select_event" name="select_event">
                         <option value="">Select Event</option>
                         {% for event in events %}
                             <option value="{{ event.event_id }}">
@@ -30,6 +43,7 @@
                         {% endfor %}
                     </select> </br>
                         Rating: <select name="select_rating">
+                        <option value="0">0</option>
                         <option value="1">1</option>
                         <option value="2">2</option>
                         <option value="3">3</option>
@@ -45,14 +59,16 @@
                         }
                     </style>
 
-                    <h3>Average Ratings</h3>
+                    <h3>Average Ratings In the Past 3 Days</h3>
 
                     <table>
+                        <th>EventID</th>
                         <th>Event Name</th>
                         <th>Rating</th>
 
                         {% for line in ratings %}
                             <tr>
+                                <td>{{ line.eventid }}</td>
                                 <td>{{ line.title }}</td>
                                 <td>{{ line.rating }}</td>
                             </tr>
