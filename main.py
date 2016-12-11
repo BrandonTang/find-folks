@@ -39,10 +39,10 @@ def index():
     if session.get('logged_in') is True:
         logged_in = True
     username = session.get('username')
-    range_start_date = datetime.date.today()
+    range_start_date = datetime.datetime.today()
     range_end_date = range_start_date + datetime.timedelta(days=3)
-    range_start_date = str(range_start_date) + " 00:00:00"
-    range_end_date = str(range_end_date) + " 00:00:00"
+    range_start_date = str(range_start_date)
+    range_end_date = str(range_end_date)
     cursor = conn.cursor()
     query = 'SELECT * FROM an_event WHERE start_time BETWEEN %s AND %s'
     cursor.execute(query, (range_start_date, range_end_date))
@@ -177,21 +177,27 @@ def filter_events():
     conn.commit()
     cursor.close()
     cursor = conn.cursor()
-    query = 'SELECT DISTINCT(event_id), title, start_time, end_time, location_name, l.zipcode, g.group_name FROM an_event e JOIN location l USING(location_name) JOIN organize o USING(event_id) JOIN a_group g USING(group_id) JOIN about a USING(group_id) JOIN interested_in i ON (a.category = i.category AND a.keyword = i.keyword) JOIN member USING(username) WHERE username = %s'
-    cursor.execute(query, (username))
+    range_start_date = datetime.datetime.today()
+    range_end_date = range_start_date + datetime.timedelta(days=3)
+    #range_start_date = str(range_start_date) + " 00:00:00"
+    #range_end_date = str(range_end_date) + " 00:00:00"
+    query = 'SELECT DISTINCT(e.event_id), title, start_time, end_time, e.location_name, e.zipcode, g.group_name FROM an_event e JOIN location l ON (l.location_name = e.location_name AND l.zipcode = e.zipcode) JOIN organize o USING(event_id) JOIN a_group g USING(group_id) JOIN about a USING(group_id) JOIN interested_in i ON (a.category = i.category AND a.keyword = i.keyword) JOIN member m USING(username) WHERE m.username = %s AND start_time BETWEEN %s and %s'
+    cursor.execute(query, (username, range_start_date, range_end_date))
     events = cursor.fetchall()
     conn.commit()
     cursor.close()
     if request.method == "POST":
         start_time = request.form.get('start_time')
+        start_time = str(start_time) +  " 00:00:00"
         end_time = request.form.get('end_time')
+        end_time = str(end_time) +  " 00:00:00"
         group_name = request.form.getlist('select_group')[0]
         interest = request.form.getlist('select_interest')[0]
         interest = interest.split(', ')
         category = interest[0]
         keyword = interest[1]
         cursor = conn.cursor()
-        query = 'SELECT DISTINCT(event_id), title, start_time, end_time, location_name, l.zipcode, g.group_name FROM an_event e JOIN location l USING(location_name) JOIN organize o USING(event_id) JOIN a_group g USING(group_id) JOIN about a USING(group_id) JOIN interested_in i ON (a.category = i.category AND a.keyword = i.keyword) JOIN member USING(username) WHERE username = %s'
+        query = 'SELECT DISTINCT(e.event_id), title, start_time, end_time, e.location_name, e.zipcode, g.group_name FROM an_event e JOIN location l ON (l.location_name = e.location_name AND l.zipcode = e.zipcode) JOIN organize o USING(event_id) JOIN a_group g USING(group_id) JOIN about a USING(group_id) JOIN interested_in i ON (a.category = i.category AND a.keyword = i.keyword) JOIN member m USING(username) WHERE m.username = %s'
         if(interest != "" and group_name == ""):
             query = query + ' AND i.category = %s AND i.keyword = %s'
             query = query + ' AND start_time BETWEEN %s AND %s'
@@ -465,8 +471,8 @@ def browse_events():
     if session.get('logged_in') is True:
         logged_in = True
     username = session.get('username')
-    range_start_date = datetime.date.today()
-    range_start_date = str(range_start_date) + " 00:00:00"
+    range_start_date = datetime.datetime.today()
+    range_start_date = str(range_start_date)
     cursor = conn.cursor()
     query = 'SELECT * FROM an_event WHERE end_time >= %s AND event_id NOT IN (SELECT event_id FROM sign_up WHERE username = %s)'
     cursor.execute(query, (range_start_date, username))
@@ -493,8 +499,8 @@ def rate_events():
     if session.get('logged_in') is True:
         logged_in = True
     username = session.get('username')
-    range_start_date = datetime.date.today()
-    range_start_date = str(range_start_date) + " 00:00:00"
+    range_start_date = datetime.datetime.today()
+    range_start_date = str(range_start_date)
     cursor = conn.cursor()
     query = 'SELECT * FROM sign_up JOIN an_event USING (event_id) WHERE username = %s AND end_time < %s'
     cursor.execute(query, (username, range_start_date))
@@ -502,11 +508,11 @@ def rate_events():
     conn.commit()
     cursor.close()
     cursor = conn.cursor()
-    range_end_date = datetime.date.today()
+    range_end_date = datetime.datetime.today()
     range_start_date = range_end_date + datetime.timedelta(days=-3)
-    range_end_date = str(range_end_date) + " 00:00:00"
-    range_start_date = str(range_start_date) + " 00:00:00"
-    query = 'SELECT event_id, title, avg(rating) as average_rating FROM sign_up JOIN an_event USING (event_id) JOIN organize USING (event_id) JOIN a_group USING (group_id) JOIN belongs_to USING (username) WHERE rating != NULL AND username = %s AND end_time BETWEEN %s AND %s GROUP BY event_id, title'
+    #range_end_date = str(range_end_date) + " 00:00:00"
+    #range_start_date = str(range_start_date) + " 00:00:00"
+    query = 'SELECT event_id, title, avg(rating) as average_rating FROM sign_up JOIN an_event USING (event_id) JOIN organize USING (event_id) JOIN a_group USING (group_id) JOIN belongs_to USING (username) WHERE username = %s AND end_time BETWEEN %s AND %s GROUP BY event_id, title'
     cursor.execute(query, (username, range_start_date, range_end_date))
     ratings = cursor.fetchall()
     conn.commit()
