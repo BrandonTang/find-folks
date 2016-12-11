@@ -17,6 +17,8 @@ conn = pymysql.connect(
     charset='utf8mb4',
     cursorclass=pymysql.cursors.DictCursor
 )
+
+
 # Configure MySQL for Windows
 # conn = pymysql.connect(
 #     host='localhost',
@@ -168,12 +170,18 @@ def filter_events():
     groups = cursor.fetchall()
     conn.commit()
     cursor.close()
+    cursor = conn.cursor()
+    query = 'SELECT * FROM interest'
+    cursor.execute(query)
+    interests = cursor.fetchall()
+    conn.commit()
+    cursor.close()
     range_start_date = datetime.date.today()
     range_end_date = range_start_date + datetime.timedelta(days=3)
     range_start_date = str(range_start_date) + " 00:00:00"
     range_end_date = str(range_end_date) + " 00:00:00"
     cursor = conn.cursor()
-    query = 'SELECT * FROM (an_event NATURAL JOIN sign_up NATURAL JOIN organize) JOIN a_group USING (group_id) WHERE username = %s AND start_time BETWEEN %s AND %s'
+    query = 'SELECT * FROM (an_event NATURAL JOIN sign_up NATURAL JOIN organize) JOIN a_group USING (group_id) JOIN interested_in USING (username) WHERE username = %s AND start_time BETWEEN %s AND %s'
     cursor.execute(query, (username, range_start_date, range_end_date))
     events = cursor.fetchall()
     conn.commit()
@@ -182,15 +190,20 @@ def filter_events():
         start_time = request.form.get('start_time')
         end_time = request.form.get('end_time')
         group_name = request.form.getlist('select_group')[0]
+        interest = request.form.getlist('select_interest')[0]
+        interest = interest.split(', ')
+        category = interest[0]
+        keyword = interest[1]
         cursor = conn.cursor()
-        query = 'SELECT * FROM (an_event NATURAL JOIN sign_up NATURAL JOIN organize) JOIN a_group USING (group_id) WHERE username = %s AND group_name = %s AND start_time BETWEEN %s AND %s'
-        cursor.execute(query, (username, group_name, start_time, end_time))
+        query = 'SELECT * FROM (an_event NATURAL JOIN sign_up NATURAL JOIN organize) JOIN a_group USING (group_id) JOIN interested_in USING (username) WHERE category = %s AND keyword = %s AND username = %s AND group_name = %s AND start_time BETWEEN %s AND %s'
+        cursor.execute(query, (category, keyword, username, group_name, start_time, end_time))
         events = cursor.fetchall()
         conn.commit()
         cursor.close()
         return render_template('filter_events.html', username=username, events=events, groups=groups,
-                               logged_in=logged_in)
-    return render_template('filter_events.html', username=username, events=events, groups=groups, logged_in=logged_in)
+                               interests=interests, logged_in=logged_in)
+    return render_template('filter_events.html', username=username, events=events, groups=groups, interests=interests,
+                           logged_in=logged_in)
 
 
 @app.route('/add_interests', methods=['GET', 'POST'])
@@ -402,7 +415,7 @@ def groups():
 @app.route('/friends', methods=['GET', 'POST'])
 def friends():
     """
-    Return the friends page that lists all friends available and allows for adding and removing friends.
+    Return the friends page that lists all friends available and allows for adding friends.
     """
     logged_in = False
     if session.get('logged_in') is True:
@@ -444,8 +457,8 @@ def browse_events():
     range_start_date = datetime.date.today()
     range_start_date = str(range_start_date) + " 00:00:00"
     cursor = conn.cursor()
-    query = 'SELECT * FROM an_event WHERE start_time <= %s AND end_time >= %s AND event_id NOT IN (SELECT event_id FROM sign_up WHERE username = %s)'
-    cursor.execute(query, (range_start_date, range_start_date, username))
+    query = 'SELECT * FROM an_event WHERE end_time >= %s AND event_id NOT IN (SELECT event_id FROM sign_up WHERE username = %s)'
+    cursor.execute(query, (range_start_date, username))
     events = cursor.fetchall()
     cursor.close()
     if request.method == "POST":

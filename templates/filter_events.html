@@ -59,6 +59,15 @@
                                 </option>
                             {% endfor %}
                         </select> </br>
+                        Interests:
+                        <select name="select_interest">
+                            <option value="">Select Interest</option>
+                            {% for interest in interests %}
+                                <option value="{{ interest.category }}, {{ interest.keyword }}">
+                                    {{ interest.category }}, {{ interest.keyword }}
+                                </option>
+                            {% endfor %}
+                        </select> </br>
                         <input type="submit" value="Filter"/>
                     </form>
                 </div>
