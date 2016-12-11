@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <script type="text/javascript">
+
     function checkDates() {
         var startTime = new Date(document.forms["filter_events"]["start_time"].value);
         var endTime = new Date(document.forms["filter_events"]["end_time"].value);
@@ -11,6 +12,7 @@
             return true;
         }
     }
+    
 </script>
 <html>
 
@@ -31,35 +33,33 @@
             <div class="row">
                 <div class="col-lg-12">
                     {% include '_flash.html' %}
-                    <h1>View your events!</h1>
+                    <h1>View Other Upcoming Events!</h1>
                     <style type="text/css">
                         table, th, td {
                             border: 1px solid black;
                         }
                     </style>
 
-                    <h3>Filtered Events</h3>
+                    <h3>Events that might be of interest to you</h3>
 
                     <table>
                         <th>Event ID</th>
                         <th>Title</th>
                         <th>Start Time</th>
                         <th>End Time</th>
+                        <th>Location</th>
                         <th>ZipCode</th>
                         <th>Group</th>
-                        <th>Category</th>
-                        <th>Keyword</th>
 
                         {% for line in events %}
                             <tr>
                                 <td>{{ line.event_id }}</td>
                                 <td>{{ line.title }}</td>
                                 <td>{{ line.start_time }}</td>
+                                <td>{{ line.end_time }}</td>
                                 <td>{{ line.location_name }}</td>
                                 <td>{{ line.zipcode }}</td>
                                 <td>{{ line.group_name }}</td>
-                                <td>{{ line.category }}</td>
-                                <td>{{ line.keyword }}</td>
                             </tr>
                         {% endfor %}
                     </table>
@@ -68,7 +68,7 @@
                         Start Time: <input type="date" name="start_time" required/> </br>
                         End Time: <input type="date" name="end_time" required/> </br>
                         Group:
-                        <select name="select_group">
+                        <select id="select_group" name="select_group">
                             <option value="">Select Group</option>
                             {% for group in groups %}
                                 <option value="{{ group.group_name }}">
@@ -77,7 +77,7 @@
                             {% endfor %}
                         </select> </br>
                         Interests:
-                        <select name="select_interest">
+                        <select id="select_interest" name="select_interest">
                             <option value="">Select Interest</option>
                             {% for interest in interests %}
                                 <option value="{{ interest.category }}, {{ interest.keyword }}">

@@ -7,7 +7,7 @@ from flask import Flask, render_template, request, session, url_for, redirect, f
 app = Flask(__name__)
 app.secret_key = 'secret_key'
 
-# Configure MySQL for Mac
+#Configure MySQL for Mac
 conn = pymysql.connect(
     unix_socket='/Applications/MAMP/tmp/mysql/mysql.sock',
     host='localhost',
@@ -158,7 +158,7 @@ def logout():
 @app.route('/filter_events', methods=['GET', 'POST'])
 def filter_events():
     """
-    Return the view my events page that shows upcoming events for current day and next three days and also allows filtering.
+    Return the view my events page that shows upcoming events hosted by groups that the user shares interests with 
     """
     logged_in = False
     if session.get('logged_in') is True:
@@ -176,13 +176,9 @@ def filter_events():
     interests = cursor.fetchall()
     conn.commit()
     cursor.close()
-    range_start_date = datetime.date.today()
-    range_end_date = range_start_date + datetime.timedelta(days=3)
-    range_start_date = str(range_start_date) + " 00:00:00"
-    range_end_date = str(range_end_date) + " 00:00:00"
     cursor = conn.cursor()
-    query = 'SELECT * FROM (an_event NATURAL JOIN sign_up NATURAL JOIN organize) JOIN a_group USING (group_id) JOIN interested_in USING (username) WHERE username = %s AND start_time BETWEEN %s AND %s'
-    cursor.execute(query, (username, range_start_date, range_end_date))
+    query = 'SELECT DISTINCT(event_id), title, start_time, end_time, location_name, l.zipcode, g.group_name FROM an_event e JOIN location l USING(location_name) JOIN organize o USING(event_id) JOIN a_group g USING(group_id) JOIN about a USING(group_id) JOIN interested_in i ON (a.category = i.category AND a.keyword = i.keyword) JOIN member USING(username) WHERE username = %s'
+    cursor.execute(query, (username))
     events = cursor.fetchall()
     conn.commit()
     cursor.close()
@@ -195,8 +191,23 @@ def filter_events():
         category = interest[0]
         keyword = interest[1]
         cursor = conn.cursor()
-        query = 'SELECT * FROM (an_event NATURAL JOIN sign_up NATURAL JOIN organize) JOIN a_group USING (group_id) JOIN interested_in USING (username) WHERE category = %s AND keyword = %s AND username = %s AND group_name = %s AND start_time BETWEEN %s AND %s'
-        cursor.execute(query, (category, keyword, username, group_name, start_time, end_time))
+        query = 'SELECT DISTINCT(event_id), title, start_time, end_time, location_name, l.zipcode, g.group_name FROM an_event e JOIN location l USING(location_name) JOIN organize o USING(event_id) JOIN a_group g USING(group_id) JOIN about a USING(group_id) JOIN interested_in i ON (a.category = i.category AND a.keyword = i.keyword) JOIN member USING(username) WHERE username = %s'
+        if(interest != "" and group_name == ""):
+            query = query + ' AND i.category = %s AND i.keyword = %s'
+            query = query + ' AND start_time BETWEEN %s AND %s'
+            cursor.execute(query, (username, category, keyword, start_time, end_time))
+        elif(interest == "" and group_name != ""):
+            query = query + ' AND g.group_name = %s'
+            query = query + ' AND start_time BETWEEN %s AND %s'
+            cursor.execute(query, (username, group_name, start_time, end_time))
+        elif(interest != "" and group_name != ""):
+            query = query + ' AND i.category = %s AND i.keyword = %s'
+            query = query + ' AND g.group_name = %s'
+            query = query + ' AND start_time BETWEEN %s AND %s'
+            cursor.execute(query, (username, category, keyword, group_name, start_time, end_time))
+        else:
+            query = query + ' AND start_time BETWEEN %s AND %s'
+            cursor.execute(query, (username, start_time, end_time))
         events = cursor.fetchall()
         conn.commit()
         cursor.close()
