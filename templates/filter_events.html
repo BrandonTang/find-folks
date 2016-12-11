@@ -34,6 +34,8 @@
                         <th>End Time</th>
                         <th>ZipCode</th>
                         <th>Group</th>
+                        <th>Category</th>
+                        <th>Keyword</th>
 
                         {% for line in events %}
                             <tr>
@@ -43,6 +45,8 @@
                                 <td>{{ line.location_name }}</td>
                                 <td>{{ line.zipcode }}</td>
                                 <td>{{ line.group_name }}</td>
+                                <td>{{ line.category }}</td>
+                                <td>{{ line.keyword }}</td>
                             </tr>
                         {% endfor %}
                     </table>
