@@ -438,9 +438,11 @@ def browse_events():
     if session.get('logged_in') is True:
         logged_in = True
     username = session.get('username')
+    range_start_date = datetime.date.today()
+    range_start_date = str(range_start_date) + " 00:00:00"
     cursor = conn.cursor()
-    query = 'SELECT * FROM an_event'
-    cursor.execute(query)
+    query = 'SELECT * FROM an_event WHERE start_time <= %s AND end_time >= %s'
+    cursor.execute(query, (range_start_date, range_start_date))
     events = cursor.fetchall()
     cursor.close()
     if request.method == "POST":
