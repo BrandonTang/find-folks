@@ -50,6 +50,7 @@
                         End Time: <input type="date" name="end_time" required/> </br>
                         Group:
                         <select name="select_group">
+                        <option value="">Select Group</option>
                             {% for group in groups %}
                                 <option value="{{ group.group_name }}">
                                     {{ group.group_name }}, {{ group.description }}
