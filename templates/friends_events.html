@@ -21,11 +21,11 @@
                     <h1>View your friends upcoming events!</h1> </br>
                     <form name="friends_events" method="POST">
                         Friend: <select name="select_friend">
-                            <option value="">Select Friend</option>
-                            {% for friend in friends %}
-                                <option value="{{ friend.friend_to }}">{{ friend.friend_to }}</option>
-                            {% endfor %}
-                        </select> </br>
+                        <option value="">Select Friend</option>
+                        {% for friend in friends %}
+                            <option value="{{ friend.friend_to }}">{{ friend.friend_to }}</option>
+                        {% endfor %}
+                    </select> </br>
                         <input type="submit" value="Search"/>
                     </form>
                     </br>
@@ -35,6 +35,8 @@
                             border: 1px solid black;
                         }
                     </style>
+
+                    <h3>Friends Events</h3>
 
                     <table>
                         <th>Title</th>
