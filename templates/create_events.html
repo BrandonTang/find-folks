@@ -11,12 +11,12 @@
     }
 
     function checkGroupSelected() {
-        if (document.getElementById("select_group").length == 0) {
+        if (document.getElementById("select_group").length == 1) {
             alert("Please join a group that you are authorized to create events for.")
             return false;
         }
         var index = document.getElementById("select_group").selectedIndex;
-        if (index == -1) {
+        if (index == 0) {
             alert("Please select a group.");
             return false;
         }
@@ -44,8 +44,8 @@
                     {% include '_flash.html' %}
                     <h1>Create an event!</h1> </br>
                     <form name="create_event" method="POST" onsubmit="return (checkDates() && checkGroupSelected())">
-                        Group:
-                        <select id ="select_group" name="select_group">
+                        Group:<select id ="select_group" name="select_group">
+                            <option value="">Select Group</option>
                             {% for group in groups %}
                                 <option value="{{ group.group_name }}">
                                     {{ group.group_name }}
