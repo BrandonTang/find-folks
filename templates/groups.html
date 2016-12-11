@@ -1,4 +1,16 @@
 <!DOCTYPE html>
+<script type="text/javascript">
+
+    function checkGroupSelected() {
+        var index = document.getElementById("select_group").selectedIndex;
+        if (index == -1) {
+            alert("Please select a group.");
+            return false;
+        }
+        return true;
+    }
+
+</script>
 <html>
 
 <head>
@@ -20,7 +32,7 @@
                     {% include '_flash.html' %}
                     <h1>Join groups!</h1> </br>
                     <form name="join_groups" method="POST">
-                        Friend: <select name="select_group">
+                        Group: <select name="select_group">
                         <option value="">Select Group</option>
                         {% for group in groups %}
                             <option value="{{ group.group_id }}">{{ group.group_name }}, {{ group.description }}</option>

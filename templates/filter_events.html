@@ -1,4 +1,17 @@
 <!DOCTYPE html>
+<script type="text/javascript">
+    function checkDates() {
+        var startTime = new Date(document.forms["filter_events"]["start_time"].value);
+        var endTime = new Date(document.forms["filter_events"]["end_time"].value);
+        if (startTime > endTime) {
+            alert("Please choose a start date that occurs prior to the end date.")
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+</script>
 <html>
 
 <head>
@@ -51,7 +64,7 @@
                         {% endfor %}
                     </table>
                     </br>
-                    <form name="filter_events" method="POST">
+                    <form name="filter_events" method="POST" onsubmit="return checkDates()">
                         Start Time: <input type="date" name="start_time" required/> </br>
                         End Time: <input type="date" name="end_time" required/> </br>
                         Group:
