@@ -188,32 +188,29 @@ def filter_events():
     cursor.close()
     if request.method == "POST":
         start_time = request.form.get('start_time')
-        start_time = str(start_time) +  " 00:00:00"
         end_time = request.form.get('end_time')
-        end_time = str(end_time) +  " 00:00:00"
-        group_name = request.form.getlist('select_group')[0]
+        start_time += " 00:00:00"
+        end_time += " 00:00:00"
+        group_name = request.form.get('select_group')
         interest = request.form.getlist('select_interest')[0]
         interest = interest.split(', ')
         category = interest[0]
         keyword = interest[1]
         cursor = conn.cursor()
-        query = 'SELECT DISTINCT(e.event_id), title, start_time, end_time, e.location_name, e.zipcode, g.group_name FROM an_event e JOIN location l ON (l.location_name = e.location_name AND l.zipcode = e.zipcode) JOIN organize o USING(event_id) JOIN a_group g USING(group_id) JOIN about a USING(group_id) JOIN interested_in i ON (a.category = i.category AND a.keyword = i.keyword) JOIN member m USING(username) WHERE m.username = %s'
-        if(interest != "" and group_name == ""):
-            query = query + ' AND i.category = %s AND i.keyword = %s'
-            query = query + ' AND start_time BETWEEN %s AND %s'
-            cursor.execute(query, (username, category, keyword, start_time, end_time))
-        elif(interest == "" and group_name != ""):
-            query = query + ' AND g.group_name = %s'
-            query = query + ' AND start_time BETWEEN %s AND %s'
-            cursor.execute(query, (username, group_name, start_time, end_time))
-        elif(interest != "" and group_name != ""):
-            query = query + ' AND i.category = %s AND i.keyword = %s'
-            query = query + ' AND g.group_name = %s'
-            query = query + ' AND start_time BETWEEN %s AND %s'
-            cursor.execute(query, (username, category, keyword, group_name, start_time, end_time))
-        else:
-            query = query + ' AND start_time BETWEEN %s AND %s'
-            cursor.execute(query, (username, start_time, end_time))
+        query = 'SELECT DISTINCT(e.event_id), title, start_time, end_time, e.location_name, e.zipcode, g.group_name FROM an_event e JOIN location l ON (l.location_name = e.location_name AND l.zipcode = e.zipcode) JOIN organize o USING(event_id) JOIN a_group g USING(group_id) JOIN about a USING(group_id) JOIN interested_in i ON (a.category = i.category AND a.keyword = i.keyword) JOIN member m USING(username) WHERE m.username = %s AND start_time BETWEEN %s AND %s'
+        cursor.execute(query, (username, start_time, end_time))
+        #if(interest != "" and group_name == ""):
+        #    query += ' AND i.category = %s AND i.keyword = %s AND start_time BETWEEN %s AND %s'
+        #    cursor.execute(query, (username, category, keyword, start_time, end_time))
+        #elif(interest == "" and group_name != ""):
+        #    query +=' AND g.group_name = %s AND start_time BETWEEN %s AND %s'
+        #    cursor.execute(query, (username, group_name, start_time, end_time))
+        #elif(interest != "" and group_name != ""):
+        #    query += ' AND i.category = %s AND i.keyword = %s AND g.group_name = %s AND start_time BETWEEN %s AND %s'
+        #    cursor.execute(query, (username, category, keyword, group_name, start_time, end_time))
+        #else:
+        #    query += ' AND start_time BETWEEN %s AND %s'
+        #    cursor.execute(query, (username, start_time, end_time))
         events = cursor.fetchall()
         conn.commit()
         cursor.close()
