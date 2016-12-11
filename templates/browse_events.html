@@ -24,7 +24,7 @@
                         <option value="">Select Event</option>
                         {% for event in events %}
                             <option value="{{ event.event_id }}">
-                                {{ event.title }}, {{ event.description }}, {{ event.start_time }},
+                                {{ event.event_id }}, {{ event.title }}, {{ event.description }}, {{ event.start_time }},
                                 {{ event.end_time }}, {{ event.location_name }}, {{ event.zipcode }}
                             </option>
                         {% endfor %}
@@ -42,6 +42,7 @@
                     <h3>Available Events</h3>
 
                     <table>
+                        <th>Event ID</th>
                         <th>Title</th>
                         <th>Description</th>
                         <th>Start Time</th>
@@ -51,6 +52,7 @@
 
                         {% for line in events %}
                             <tr>
+                                <td>{{ line.event_id }}</td>
                                 <td>{{ line.title }}</td>
                                 <td>{{ line.description }}</td>
                                 <td>{{ line.start_time }}</td>

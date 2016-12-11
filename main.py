@@ -1,22 +1,13 @@
-from flask import Flask, render_template, request, session, url_for, redirect, flash
+import datetime
 import hashlib
 import pymysql.cursors
-import datetime
+from flask import Flask, render_template, request, session, url_for, redirect, flash
 
 # Initialize the app from Flask
 app = Flask(__name__)
 app.secret_key = 'secret_key'
 
-# conn = pymysql.connect(
-# 					   host='localhost',
-#                       user='root',
-#                       password='',
-#                       db='findfolks',
-#                       charset='utf8mb4',
-#                       cursorclass=pymysql.cursors.DictCursor
-#                       )
-
-# Configure MySQL
+# Configure MySQL for Mac
 conn = pymysql.connect(
     unix_socket='/Applications/MAMP/tmp/mysql/mysql.sock',
     host='localhost',
@@ -26,6 +17,15 @@ conn = pymysql.connect(
     charset='utf8mb4',
     cursorclass=pymysql.cursors.DictCursor
 )
+# Configure MySQL for Windows
+# conn = pymysql.connect(
+#     host='localhost',
+#     user='root',
+#     password='',
+#     db='findfolks',
+#     charset='utf8mb4',
+#     cursorclass=pymysql.cursors.DictCursor
+# )
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -156,7 +156,7 @@ def logout():
 @app.route('/filter_events', methods=['GET', 'POST'])
 def filter_events():
     """
-    Return the homepage that shows upcoming events for current day and next three days.
+    Return the view my events page that shows upcoming events for current day and next three days and also allows filtering.
     """
     logged_in = False
     if session.get('logged_in') is True:
@@ -195,6 +195,9 @@ def filter_events():
 
 @app.route('/add_interests', methods=['GET', 'POST'])
 def add_interests():
+    """
+    Return the add interests page that allows users to add their interests.
+    """
     logged_in = False
     if session.get('logged_in') is True:
         logged_in = True
@@ -441,8 +444,8 @@ def browse_events():
     range_start_date = datetime.date.today()
     range_start_date = str(range_start_date) + " 00:00:00"
     cursor = conn.cursor()
-    query = 'SELECT * FROM an_event WHERE start_time <= %s AND end_time >= %s'
-    cursor.execute(query, (range_start_date, range_start_date))
+    query = 'SELECT * FROM an_event WHERE start_time <= %s AND end_time >= %s AND event_id NOT IN (SELECT event_id FROM sign_up WHERE username = %s)'
+    cursor.execute(query, (range_start_date, range_start_date, username))
     events = cursor.fetchall()
     cursor.close()
     if request.method == "POST":
