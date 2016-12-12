@@ -179,9 +179,7 @@ def filter_events():
     cursor = conn.cursor()
     range_start_date = datetime.datetime.today()
     range_end_date = range_start_date + datetime.timedelta(days=3)
-    #range_start_date = str(range_start_date) + " 00:00:00"
-    #range_end_date = str(range_end_date) + " 00:00:00"
-    query = 'SELECT DISTINCT(e.event_id), title, start_time, end_time, e.location_name, e.zipcode, g.group_name FROM an_event e JOIN location l ON (l.location_name = e.location_name AND l.zipcode = e.zipcode) JOIN organize o USING(event_id) JOIN a_group g USING(group_id) JOIN about a USING(group_id) JOIN interested_in i ON (a.category = i.category AND a.keyword = i.keyword) JOIN member m USING(username) WHERE m.username = %s AND start_time BETWEEN %s and %s'
+    query = 'SELECT DISTINCT (e.event_id), title, start_time, end_time, e.location_name, e.zipcode, g.group_name FROM an_event e JOIN location l ON (l.location_name = e.location_name AND l.zipcode = e.zipcode) JOIN organize o USING (event_id) JOIN a_group g USING (group_id) JOIN about a USING (group_id) JOIN interested_in i ON (a.category = i.category AND a.keyword = i.keyword) JOIN member m USING (username) WHERE m.username = %s AND start_time BETWEEN %s and %s'
     cursor.execute(query, (username, range_start_date, range_end_date))
     events = cursor.fetchall()
     conn.commit()
@@ -193,19 +191,19 @@ def filter_events():
         end_time += " 00:00:00"
         group_name = request.form.get('select_group')
         interest = request.form.getlist('select_interest')[0]
-        if(interest != ""):
+        if interest != "":
             interest = interest.split(', ')
             category = interest[0]
             keyword = interest[1]
         cursor = conn.cursor()
-        query = 'SELECT DISTINCT(e.event_id), title, start_time, end_time, e.location_name, e.zipcode, g.group_name FROM an_event e JOIN location l ON (l.location_name = e.location_name AND l.zipcode = e.zipcode) JOIN organize o USING(event_id) JOIN a_group g USING(group_id) JOIN about a USING(group_id) JOIN interested_in i ON (a.category = i.category AND a.keyword = i.keyword) JOIN member m USING(username) WHERE m.username = %s'
-        if(interest != "" and group_name == ""):
+        query = 'SELECT DISTINCT (e.event_id), title, start_time, end_time, e.location_name, e.zipcode, g.group_name FROM an_event e JOIN location l ON (l.location_name = e.location_name AND l.zipcode = e.zipcode) JOIN organize o USING (event_id) JOIN a_group g USING (group_id) JOIN about a USING (group_id) JOIN interested_in i ON (a.category = i.category AND a.keyword = i.keyword) JOIN member m USING (username) WHERE m.username = %s'
+        if interest != "" and group_name == "":
             query += ' AND i.category = %s AND i.keyword = %s AND start_time BETWEEN %s AND %s'
             cursor.execute(query, (username, category, keyword, start_time, end_time))
-        elif(interest == "" and group_name != ""):
-            query +=' AND g.group_name = %s AND start_time BETWEEN %s AND %s'
+        elif interest == "" and group_name != "":
+            query += ' AND g.group_name = %s AND start_time BETWEEN %s AND %s'
             cursor.execute(query, (username, group_name, start_time, end_time))
-        elif(interest != "" and group_name != ""):
+        elif interest != "" and group_name != "":
             query += ' AND i.category = %s AND i.keyword = %s AND g.group_name = %s AND start_time BETWEEN %s AND %s'
             cursor.execute(query, (username, category, keyword, group_name, start_time, end_time))
         else:
@@ -507,8 +505,6 @@ def rate_events():
     cursor = conn.cursor()
     range_end_date = datetime.datetime.today()
     range_start_date = range_end_date + datetime.timedelta(days=-3)
-    #range_end_date = str(range_end_date) + " 00:00:00"
-    #range_start_date = str(range_start_date) + " 00:00:00"
     query = 'SELECT event_id, title, avg(rating) as average_rating FROM sign_up JOIN an_event USING (event_id) JOIN organize USING (event_id) JOIN a_group USING (group_id) JOIN belongs_to USING (username) WHERE username = %s AND end_time BETWEEN %s AND %s GROUP BY event_id, title'
     cursor.execute(query, (username, range_start_date, range_end_date))
     ratings = cursor.fetchall()
